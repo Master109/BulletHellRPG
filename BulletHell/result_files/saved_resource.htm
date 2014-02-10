@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)http://fiddle.jshell.net/V7HxA/30/show/light/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title> - jsFiddle demo</title>
+  
+  <script type="text/javascript" src="processing.min.js"></script>
+  
+  
+  
+  <link rel="stylesheet" type="text/css" href="result-light.css">
+  
+  <style type="text/css">
+    
+  </style>
+  
+
+
+<script type="text/javascript">//<![CDATA[ 
+window.onload=function(){
+
+}//]]>  
+
+</script>
+
+
+<style type="text/css">@font-face {
+  font-family: "PjsEmptyFont";
+  src: url('data:application/x-font-ttf;base64,AAEAAAAKAIAAAwAgT1MvMgAAAAAAAAEoAAAAVmNtYXAAAAAAAAABiAAAACxnbHlmAAAAAAAAAbwAAAAkaGVhZAAAAAAAAACsAAAAOGhoZWEAAAAAAAAA5AAAACRobXR4AAAAAAAAAYAAAAAGbG9jYQAAAAAAAAG0AAAABm1heHAAAAAAAAABCAAAACBuYW1lAAAAAAAAAeAAAAAgcG9zdAAAAAAAAAIAAAAAEAABAAAAAQAAAkgTY18PPPUACwAgAAAAALSRooAAAAAAyld0xgAAAAAAAQABAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEAAAACAAIAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACMAIwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAMAAQAAAAwABAAgAAAABAAEAAEAAABB//8AAABB////wAABAAAAAAAAAAgAEgAAAAEAAAAAAAAAAAAAAAAxAAABAAAAAAABAAEAAQAAMTcBAQAAAAAAAgAeAAMAAQQJAAEAAAAAAAMAAQQJAAIAAgAAAAAAAQAAAAAAAAAAAAAAAAAA')
+       format('truetype');
+}</style><style type="text/css"></style></head>
+<body>
+  <script src="processing-1.3.6.min.js"></script>
+<script type="application/processing" data-processing-target="pjs">
+    PFont font;
+
+    Player p;
+    Level1 l1;
+    Level2 l2;
+    Boss1 b1;
+    Boss2 b2;
+
+    //String[] data;
+    //String[] data2;
+
+    ArrayList < Enemy > enemies;
+    ArrayList < Bullet > bullets, splitBullets;
+    ArrayList < BulletSplit > bulletSplits;
+    ArrayList < BulletStraight > bounceBullets;
+    ArrayList < Mist > mists;
+    ArrayList < Float > highScores;
+
+    Button[] buttons;
+    BackgroundSquare[][] backgroundSquares;
+
+    int[] perkEquiped;
+    int[] holdKeyTimers;
+    int currentHelpScreen;
+    int bombNum;
+    int currentLevel;
+    int graze;
+    int timesToRun;
+    int kills;
+    int grazeAchievementCounter;
+    int previousGrazeAchievementCounter;
+    int notificationShowTimer;
+    int reloadSpeedCost;
+    int timeIntoScoreCost;
+    int grazeIntoScoreCost;
+    int killsIntoScoreCost;
+    int bombNumCost;
+    int bulletSprayCost;
+    int perkPoints;
+    int highScoreModifier;
+
+    float[] enemyAppearDeadlines;
+    float[] enemyAppearTimes;
+    float score;
+    float timeIntoScoreModifier;
+    float grazeIntoScoreModifier;
+    float killsIntoScoreModifier;
+    float playTimer;
+    float bulletSprayRange;
+
+    boolean[] keys;
+    boolean autoFire;
+    boolean shouldRestart;
+    boolean paused;
+    boolean viewingHelpScreen;
+    boolean showEffects;
+    boolean levelComplete;
+    boolean level1KillsAchievementShow;
+    boolean level1Score1AchievementShow;
+    boolean level1Complete, level2Complete;
+
+    boolean[] grazeAchievementQueued, grazeAchievementEarned, grazeAchievementShow;
+    boolean level1KillsAchievementQueued;
+    boolean level1Score1AchievementQueued;
+    boolean level1KillsAchievementEarned;
+    boolean level1Score1AchievementEarned;
+    boolean viewingBlendMode;
+    boolean inShop;
+    boolean viewingAchievements;
+    boolean viewingSaveMenu;
+    boolean inAutoSaveMode;
+
+    final color ENEMY_COLOR = color(255, 0, 0);
+    final color BULLET_WIGGLE_COLOR = color(0, 0, 255);
+    final color TERRAIN_COLOR = color(255);
+    final int NUM_OF_ENEMY_TYPES = 4;
+    final int BUTTON_NUM = 18;
+    final int NUM_ACHIEVEMENTS = 3;
+    final int BACKGROUND_SQUARE_SPACING = 25;
+    final float FONT_SIZE = 27;
+    final PVector NO_WAYPOINT = new PVector(-1, -1);
+
+    void setup() {
+        size(925, 715);
+        smooth();
+
+        strokeWeight(5);
+        noStroke();
+
+        rectMode(CENTER);
+        background(255);
+
+        frameRate(60);
+
+        //data2 = loadStrings("Initial Data.txt");
+        //if (loadStrings("Save Data.txt") == null)
+        //saveStrings("Save Data.txt", data2);
+
+        //if (data2[25].equals("false"))
+        //data = loadStrings("Save Data.txt");
+        //else
+        //data = loadStrings("Initial Data.txt");
+        //data2[25] = "false";
+        //saveStrings("Initial Data.txt", data2);
+        perkEquiped = new int[BUTTON_NUM];
+        perkEquiped[0] = 0;
+        perkEquiped[2] = 0;
+        perkEquiped[4] = 0;
+        perkEquiped[6] = 0;
+        perkEquiped[8] = 0;
+        perkEquiped[12] = 0;
+        currentHelpScreen = 0;
+        notificationShowTimer = 0;
+        perkPoints = 10;
+
+        keys = new boolean[17];
+        autoFire = true;
+        viewingHelpScreen = true;
+        showEffects = true;
+        grazeAchievementShow = new boolean[NUM_ACHIEVEMENTS];
+        grazeAchievementQueued = new boolean[NUM_ACHIEVEMENTS];
+        grazeAchievementEarned = new boolean[NUM_ACHIEVEMENTS];
+        for (int i = 0; i < NUM_ACHIEVEMENTS; i++)
+        grazeAchievementEarned[i] = false;
+        level1KillsAchievementShow = false;
+        level1Score1AchievementShow = false;
+        level1KillsAchievementQueued = false;
+        level1Score1AchievementQueued = false;
+        level1KillsAchievementEarned = false;
+        level1Score1AchievementEarned = false;
+        viewingBlendMode = false;
+        viewingAchievements = false;
+        inShop = false;
+        level1Complete = false;
+        level2Complete = false;
+
+        currentLevel = -1;
+        holdKeyTimers = new int[12];
+        timesToRun = 1;
+        reloadSpeedCost = 2;
+        timeIntoScoreCost = 1;
+        timeIntoScoreModifier = 1;
+        grazeIntoScoreCost = 1;
+        grazeIntoScoreModifier = 1;
+        killsIntoScoreCost = 1;
+        killsIntoScoreModifier = 1;
+        bombNumCost = 6;
+        bulletSprayCost = 4;
+
+        font = createFont("Arial", FONT_SIZE);
+        textFont(font, FONT_SIZE);
+
+        highScores = new ArrayList < Float > ();
+        bulletSplits = new ArrayList < BulletSplit > ();
+        bounceBullets = new ArrayList < BulletStraight > ();
+        highScores.add(0.0);
+        highScores.add(10.0);
+        backgroundSquares = new BackgroundSquare[0][0];
+        buttons = new Button[BUTTON_NUM];
+        buttons[0] = new Button(new PVector(250, 125), FONT_SIZE, "Reload Speed - $" + reloadSpeedCost);
+        buttons[1] = new Button(new PVector(250, 225), FONT_SIZE, "Unequip");
+        buttons[2] = new Button(new PVector(650, 125), FONT_SIZE, "Time Into Score - $" + timeIntoScoreCost);
+        buttons[3] = new Button(new PVector(650, 225), FONT_SIZE, "Unequip");
+        buttons[4] = new Button(new PVector(650, 325), FONT_SIZE, "Graze Into Score - $" + grazeIntoScoreCost);
+        buttons[5] = new Button(new PVector(650, 425), FONT_SIZE, "Unequip");
+        buttons[6] = new Button(new PVector(650, 525), FONT_SIZE, "Kills Into Score - $" + killsIntoScoreCost);
+        buttons[7] = new Button(new PVector(650, 625), FONT_SIZE, "Unequip");
+        buttons[8] = new Button(new PVector(250, 325), FONT_SIZE, "Bombs - $" + bombNumCost);
+        buttons[9] = new Button(new PVector(250, 425), FONT_SIZE, "Unequip");
+        buttons[10] = new Button(new PVector(width / 2 - 100, height / 2), FONT_SIZE, "Save");
+        buttons[11] = new Button(new PVector(width / 2 + 100, height / 2), FONT_SIZE, "Reset");
+        buttons[12] = new Button(new PVector(250, 525), FONT_SIZE, "Bullet Spread - $" + bulletSprayCost);
+        buttons[13] = new Button(new PVector(250, 625), FONT_SIZE, "Unequip [Up or Down]");
+        buttons[14] = new Button(new PVector(width / 2, height - 50), FONT_SIZE, "Turn autosave off");
+        buttons[15] = new Button(new PVector(width / 4, height - 50), FONT_SIZE, "Survival");
+        buttons[16] = new Button(new PVector(width / 2, height - 50), FONT_SIZE, "Level 1");
+        buttons[17] = new Button(new PVector(width * .75, height - 50), FONT_SIZE, "Level 2");
+
+        restart();
+    }
+
+    void restart() {
+        //for (int x = BACKGROUND_SQUARE_SPACING / 2; x <= width; x += BACKGROUND_SQUARE_SPACING)
+        //{
+        //for (int y = BACKGROUND_SQUARE_SPACING / 2; y <= height; y += BACKGROUND_SQUARE_SPACING)
+        //{
+        //backgroundSquares[x][y] = new BackgroundSquare(new PVector(x, y, 10), BACKGROUND_SQUARE_SPACING, new int[1]);
+        //}
+        //}
+
+        paused = false;
+        shouldRestart = false;
+        levelComplete = false;
+        bombNum = 3;
+        //else
+        //bombNum = 0;
+        if (perkEquiped[8] == 1) bombNum += bombNumCost - 6;
+        else if (perkEquiped[8] == -1) bombNum = 3;
+        playTimer = 0;
+        score = 0;
+        graze = 0;
+        kills = 0;
+        previousGrazeAchievementCounter = 0;
+        grazeAchievementCounter = 0;
+        enemyAppearTimes = new float[NUM_OF_ENEMY_TYPES];
+        enemyAppearDeadlines = new float[NUM_OF_ENEMY_TYPES];
+        enemyAppearDeadlines[0] = 2000 / timesToRun;
+        enemyAppearDeadlines[1] = 1250 / timesToRun;
+        enemyAppearDeadlines[2] = 475 / timesToRun;
+        enemyAppearDeadlines[3] = 2750 / timesToRun;
+
+        p = new Player(new PVector(), new PVector(width / 2, height / 2), new PVector(), 20, 1, 0, 5.0, true);
+        bullets = new ArrayList < Bullet > ();
+        splitBullets = new ArrayList < Bullet > ();
+        enemies = new ArrayList < Enemy > ();
+        mists = new ArrayList < Mist > ();
+
+        if (currentLevel == 0) {
+            Enemy e = new EnemyShootHeadOn(new PVector[0], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(random(width), random(height)), 3, 25, 10, 0, 60, 0, 50, 0.0, 6.0, true, false);
+            enemies.add(e);
+            while (e.loc.dist(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y)) <= 450)
+            e.loc.set(random(width), random(height), 01);
+        }
+
+        l1 = new Level1();
+        l2 = new Level2();
+        b1 = new Boss1(new PVector(width, height / 2), new PVector(width, height / 2), NO_WAYPOINT, new PVector(), new PVector(width + 100, height / 2), 0, 0, 25, 0, 0, 0, 200, 400, 0, 65, 8, 160, 0, 10, 1.0, 8.5, 0.0, 0.0, false, true);
+        b2 = new Boss2(new PVector(width, height / 2), new PVector(width, height / 2), NO_WAYPOINT, new PVector(), new PVector(width + 100, height / 2), 0, 0, 25, 0, 0, 0, 200, 400, 0, 65, 8, 160, 0, 10, 1.0, 8.5, 0.0, 0.0, false, true);
+    }
+
+    void draw() {
+        //prinasdtlasflnkn(highScoreModifier);
+
+        for (int i = 0; i < BUTTON_NUM; i++)
+        buttons[i].isVisible = false;
+
+        //if (viewingBlendMode)
+        //blend(0, 0, width, height, 0, 0, width, height, SUBTRACT);
+        //else
+        //blend(0, 0, width, height, 0, 0, width, height, NORMAL);
+
+        keyTimerStuff();
+
+        if (viewingHelpScreen) {
+            background(127.5);
+            fill(0);
+            textAlign(CENTER, TOP);
+            text("Graze bullets and kill enemies to gain score", width / 2, 0);
+            text("WASD: Move", width / 2, FONT_SIZE);
+            text("Left and right arrow keys: Face left or right", width / 2, FONT_SIZE * 2);
+            text("SHIFT: You move slower while pressing it", width / 2, FONT_SIZE * 3);
+            text("SPACE: Destroy all bullets and enemies on screen for no score", width / 2, FONT_SIZE * 4);
+            text("Hold R: restart", width / 2, FONT_SIZE * 5);
+            text("F: Toggle autofire", width / 2, FONT_SIZE * 6);
+            text("N: Skip time until next enemy arrives (only in Survival)", width / 2, FONT_SIZE * 7);
+            text("T: Toggle faster game speed", width / 2, FONT_SIZE * 8);
+            text("P: Toggle pause", width / 2, FONT_SIZE * 9);
+            text("L: Toggle visual effects (lag)", width / 2, FONT_SIZE * 10);
+            //text("B: WTF?!", width / 2, FONT_SIZE * 14);
+            text("Q: Visit shop", width / 2, FONT_SIZE * 11);
+            text("V: View achievements", width / 2, FONT_SIZE * 12);
+            text("Enter: Enter save menu (coming soo -- there is no save system right now)", width / 2, FONT_SIZE * 12.75);
+            buttons[15].isVisible = true;
+            buttons[16].isVisible = true;
+            buttons[17].isVisible = true;
+            if (buttons[15].pressed) {
+                currentLevel = 0;
+                viewingHelpScreen = false;
+                viewingAchievements = false;
+                inShop = false;
+                restart();
+            } else if (buttons[16].pressed) {
+                currentLevel = 1;
+                viewingHelpScreen = false;
+                viewingAchievements = false;
+                inShop = false;
+                restart();
+            } else if (buttons[17].pressed) {
+                currentLevel = 2;
+                viewingHelpScreen = false;
+                viewingAchievements = false;
+                inShop = false;
+                restart();
+            }
+            buttons[15].run();
+            buttons[15].show();
+            buttons[16].run();
+            buttons[16].show();
+            buttons[17].run();
+            buttons[17].show();
+            buttons[15].pressed = false;
+            buttons[16].pressed = false;
+            buttons[17].pressed = false;
+            if (currentHelpScreen == 0) {
+                text("H: Toggle this boring screen (won't work now, and the puzzle", width / 2, FONT_SIZE * 14);
+                text("to make it work is too hard for u. MUHAHAHAHA!)", width / 2, FONT_SIZE * 15);
+            } else if (currentHelpScreen == 1) {
+                text("H: Toggle this screen", width / 2, FONT_SIZE * 14);
+                text("It's touching that u returned to this exciting screen for", width / 2, FONT_SIZE * 15);
+                text("another stupid joke... but too bad", width / 2, FONT_SIZE * 16);
+            } else if (currentHelpScreen == 2) {
+                text("H: Toggle this screen", width / 2, FONT_SIZE * 14);
+                text("Ah, now I know alot about u. To come back here you are either", width / 2, FONT_SIZE * 15);
+                text("thoughtful or careless. Or someone pressed the button for u. Or", width / 2, FONT_SIZE * 16);
+                text("some combination of the three.", width / 2, FONT_SIZE * 17);
+            } else if (currentHelpScreen == 3) {
+                text("H: Toggle this screen", width / 2, FONT_SIZE * 14);
+                text("Oh, don't u want to know about me? You can choose my", width / 2, FONT_SIZE * 15);
+                text("name, and I am good at everthing: Video-games, writing,", width / 2, FONT_SIZE * 16);
+                text("surfing, the opposite sex (u can decide if I am male or", width / 2, FONT_SIZE * 17);
+                text("female), talking, self-control, driving vehicles, music, circus", width / 2, FONT_SIZE * 18);
+                text("toys, sports, etc. Oh yeah, and life.", width / 2, FONT_SIZE * 19);
+            } else if (currentHelpScreen == 4) {
+                text("H: Toggle this screen", width / 2, FONT_SIZE * 14);
+                text("I'm especially good at music, though. Wanna hear me rap? I", width / 2, FONT_SIZE * 15);
+                text("can rap so fast and well! {Insert name here takes in a huge breath}", width / 2, FONT_SIZE * 16);
+            } else if (currentHelpScreen == 5) background(0);
+            else if (currentHelpScreen == 6) {
+                text("H: Toggle this screen", width / 2, FONT_SIZE * 14);
+                text("{Insert name here pants heavily} Did you even hear what I said?", width / 2, FONT_SIZE * 15);
+                text("I crammed a lot of words together.", width / 2, FONT_SIZE * 16);
+            }
+        } else if (inShop) {
+            background(127.5);
+            textAlign(CENTER, TOP);
+            text("Perk points: " + perkPoints, width / 2, 0);
+            text("Reach " + highScores.get(highScores.size() - 1) + " score in survival mode, beat levels, or get", width / 2, FONT_SIZE);
+            text("achievements to earn perk points", width / 2, FONT_SIZE * 2);
+            buttons[0].isVisible = true;
+            buttons[2].isVisible = true;
+            buttons[4].isVisible = true;
+            buttons[6].isVisible = true;
+            buttons[8].isVisible = true;
+            buttons[12].isVisible = true;
+            if (reloadSpeedCost > 2) buttons[1].isVisible = true;
+            if (timeIntoScoreCost > 1) buttons[3].isVisible = true;
+            if (grazeIntoScoreCost > 1) buttons[5].isVisible = true;
+            if (killsIntoScoreCost > 1) buttons[7].isVisible = true;
+            if (bombNumCost > 6) buttons[9].isVisible = true;
+            if (bulletSprayCost > 4) buttons[13].isVisible = true;
+            for (int i = 0; i < BUTTON_NUM; i++) {
+                if (buttons[i].isVisible) {
+                    if (buttons[i].pressed) {
+                        if (i == 0 && perkPoints >= reloadSpeedCost) {
+                            if (reloadSpeedCost <= 6) {
+                                if (perkEquiped[0] == 0) perkEquiped[0] = 1;
+                                perkPoints -= reloadSpeedCost;
+                                reloadSpeedCost++;
+                                //if (inAutoSaveMode)
+                                //saveMenu();
+                            }
+                        } else if (i == 12 && perkPoints >= bulletSprayCost) {
+                            if (bulletSprayCost <= 4) {
+                                if (perkEquiped[12] == 0) perkEquiped[12] = 1;
+                                perkPoints -= bulletSprayCost;
+                                bulletSprayCost++;
+                                //if (inAutoSaveMode)
+                                //saveMenu();
+                            }
+                        } else if (i == 2 && perkPoints >= timeIntoScoreCost) {
+                            if (perkEquiped[2] == 0) perkEquiped[2] = 1;
+                            perkPoints -= timeIntoScoreCost;
+                            timeIntoScoreCost++;
+                            timeIntoScoreModifier += .09;
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        } else if (i == 4 && perkPoints >= grazeIntoScoreCost) {
+                            if (perkEquiped[4] == 0) perkEquiped[4] = 1;
+                            perkPoints -= grazeIntoScoreCost;
+                            grazeIntoScoreCost++;
+                            grazeIntoScoreModifier += .11;
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        } else if (i == 6 && perkPoints >= killsIntoScoreCost) {
+                            if (perkEquiped[6] == 0) perkEquiped[6] = 1;
+                            perkPoints -= killsIntoScoreCost;
+                            killsIntoScoreCost++;
+                            killsIntoScoreModifier += 2.5;
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        } else if (i == 8 && perkPoints >= bombNumCost) {
+                            if (perkEquiped[8] == 0) perkEquiped[8] = 1;
+                            perkPoints -= bombNumCost;
+                            bombNumCost++;
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        } else if (i == 1) {
+                            if (perkEquiped[0] == 1) perkEquiped[0] = -1;
+                            else if (perkEquiped[0] == -1) perkEquiped[0] = 1;
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        } else if (i == 3) {
+                            if (perkEquiped[2] == 1) perkEquiped[2] = -1;
+                            else if (perkEquiped[2] == -1) perkEquiped[2] = 1;
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        } else if (i == 5) {
+                            if (perkEquiped[4] == 1) perkEquiped[4] = -1;
+                            else if (perkEquiped[4] == -1) perkEquiped[4] = 1;
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        } else if (i == 7) {
+                            if (perkEquiped[6] == 1) perkEquiped[6] = -1;
+                            else if (perkEquiped[6] == -1) perkEquiped[6] = 1;
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        } else if (i == 9) {
+                            if (perkEquiped[8] == 1) {
+                                perkEquiped[8] = -1;
+                                bombNum -= bombNumCost - 6;
+                            } else if (perkEquiped[8] == -1) {
+                                perkEquiped[8] = 1;
+                                bombNum += bombNumCost - 6;
+                            }
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        } else if (i == 13) {
+                            if (perkEquiped[12] == 1) {
+                                perkEquiped[12] = -1;
+                                bulletSprayRange = 0;
+                            } else if (perkEquiped[12] == -1) {
+                                perkEquiped[12] = 1;
+                                bulletSprayRange = HALF_PI;
+                            }
+                            //if (inAutoSaveMode)
+                            //saveMenu();
+                        }
+                    }
+                    buttons[i].run();
+                    buttons[i].show();
+                    buttons[i].pressed = false;
+                }
+            }
+            buttons[0].text2 = "Reload Speed - $" + reloadSpeedCost;
+            buttons[2].text2 = "Time Into Score - $" + timeIntoScoreCost;
+            buttons[4].text2 = "Graze Into Score - $" + grazeIntoScoreCost;
+            buttons[6].text2 = "Kills Into Score - $" + killsIntoScoreCost;
+            buttons[8].text2 = "Bombs - $" + bombNumCost;
+            buttons[12].text2 = "Bullet Spread - $" + bulletSprayCost;
+            if (reloadSpeedCost == 7) buttons[0].text2 = "Reload Speed (MAX)";
+            if (bulletSprayCost == 5) buttons[12].text2 = "Bullet Spread (MAX)";
+            if (perkEquiped[0] == -1) buttons[1].text2 = "Equip";
+            else if (perkEquiped[0] == 1) buttons[1].text2 = "Unequip";
+            if (perkEquiped[2] == -1) buttons[3].text2 = "Equip";
+            else if (perkEquiped[2] == 1) buttons[3].text2 = "Unequip";
+            if (perkEquiped[4] == -1) buttons[5].text2 = "Equip";
+            else if (perkEquiped[4] == 1) buttons[5].text2 = "Unequip";
+            if (perkEquiped[6] == -1) buttons[7].text2 = "Equip";
+            else if (perkEquiped[6] == 1) buttons[7].text2 = "Unequip";
+            if (perkEquiped[8] == -1) buttons[9].text2 = "Equip";
+            else if (perkEquiped[8] == 1) buttons[9].text2 = "Unequip";
+            if (perkEquiped[12] == -1) buttons[13].text2 = "Equip [Up / Down]";
+            else if (perkEquiped[12] == 1) buttons[13].text2 = "Unequip [Up / Down]";
+        } else if (viewingAchievements) {
+            background(127.5);
+            showAchievementList();
+        } else if (viewingSaveMenu) {
+            background(127.5);
+            buttons[10].isVisible = true;
+            buttons[11].isVisible = true;
+            buttons[14].isVisible = true;
+            //if (buttons[10].pressed && buttons[10].isVisible)
+            //saveMenu();
+            //if (buttons[11].pressed && buttons[11].isVisible)
+            //{
+            //data2[25] = "true";
+            //saveStrings("Initial Data.txt", data2);
+            //}
+            //else if (buttons[14].pressed)
+            //{
+            //if (buttons[14].text2 == "Turn autosave on")
+            //{
+            //buttons[14].text2 = "Turn autosave off";
+            //inAutoSaveMode = true;
+            //}
+            //else if (buttons[14].text2 == "Turn autosave off")
+            //{
+            //buttons[14].text2 = "Turn autosave on";
+            //inAutoSaveMode = false;
+            //}
+            //}
+            buttons[14].run();
+            buttons[14].show();
+            buttons[14].pressed = false;
+            buttons[10].run();
+            buttons[10].show();
+            buttons[11].run();
+            buttons[11].show();
+            buttons[10].pressed = false;
+            buttons[11].pressed = false;
+            text("Reset requires reload of page", buttons[11].loc.x + 135, buttons[11].loc.y + 50);
+            text("Saving cancels reset", buttons[11].loc.x + 135, buttons[11].loc.y + 75);
+        }
+
+        if (!viewingHelpScreen && !viewingAchievements && !inShop && !viewingSaveMenu) {
+            if (currentLevel == -1) return;
+
+            if (currentLevel == 0) {
+                if (shouldRestart) {
+                    text("R: Restart               H: Main menu", width / 2, height / 2);
+                    return;
+                }
+
+                if (!paused) {
+                    if (score > highScores.get(highScores.size() - 1)) {
+                        highScores.add(highScores.get(highScores.size() - 1) + highScoreModifier);
+                        highScoreModifier = int(highScores.get(highScores.size() - 1));
+                        perkPoints++;
+                        //if (inAutoSaveMode)
+                        //saveMenu();
+                    }
+
+                    for (int i = 1; i <= timesToRun; i++) {
+                        playTimer += 1 / frameRate;
+                        float timeIntScoreModifier2 = 0;
+                        if (perkEquiped[2] == 1) timeIntScoreModifier2 = timeIntoScoreModifier;
+                        score += (1 + timeIntScoreModifier2) / frameRate;
+                    }
+
+                    ArrayList < Enemy > survivingEnemies = new ArrayList < Enemy > ();
+
+                    for (int i = 0; i <= NUM_OF_ENEMY_TYPES - 1; i++)
+                    enemyAppearTimes[i]++;
+
+                    for (int i = 1; i <= timesToRun; i++)
+                    p.move();
+
+                    //showGrid();
+
+                    fill(127.5, 175);
+                    rect(width / 2, height / 2, width, height + 2);
+
+                    for (int i = 0; i <= NUM_OF_ENEMY_TYPES - 1; i++) {
+                        if (enemyAppearTimes[i] >= enemyAppearDeadlines[i]) {
+                            enemyAppearDeadlines[0] = 2000 / timesToRun;
+                            enemyAppearDeadlines[1] = 1250 / timesToRun;
+                            enemyAppearDeadlines[2] = 475 / timesToRun;
+                            enemyAppearDeadlines[3] = 2750 / timesToRun;
+                            if (i == 0) {
+                                Enemy e = new EnemyMoveTowardsPlayer(new PVector[0], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(random(width), random(height)), 0, 25, 10, 0, 240, 19, 7.0, 7.0, true, false);
+                                enemies.add(e);
+                                while (e.loc.dist(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y)) <= 450)
+                                e.loc.set(random(width), random(height), 0);
+                            } else if (i == 1) {
+                                Enemy e = new EnemyShootHeadOn(new PVector[0], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(random(width), random(height)), 0, 25, 30, 0, 10, 14, .3, 7.0, 2.0, true, false);
+                                enemies.add(e);
+                                while (e.loc.dist(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y)) <= 450)
+                                e.loc.set(random(width), random(height), 0);
+                            } else if (i == 2) {
+                                Enemy e = new EnemyShootHeadOn(new PVector[0], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(random(width), random(height)), 3, 25, 10, 0, 60, 0, 50, 0.0, 6.0, true, false);
+                                enemies.add(e);
+                                while (e.loc.dist(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y)) <= 450)
+                                e.loc.set(random(width), random(height), 0);
+                            } else if (i == 3) {
+                                Enemy e = new EnemyShootWigglyBulletSpread(new PVector[0], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(random(width), random(height)), 17, 7, 25, 5, 0, 25, 25, 0, 45, 26, PI, 1.0, 7.5, TWO_PI, true, false);
+                                enemies.add(e);
+                                while (e.loc.dist(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y)) <= 450)
+                                e.loc.set(random(width), random(height), 0);
+                            }
+                            enemyAppearTimes[i] = 0;
+                            enemyAppearDeadlines[i] *= .925;
+                        }
+                    }
+
+                    for (int i = 0; i <= 5; i++) {
+                        for (Bullet b: bullets) {
+                            if (!b.exists) {
+                                bullets.remove(b);
+                                break;
+                            }
+                        }
+                    }
+
+                    for (Bullet b: splitBullets)
+                    bullets.add(b);
+
+                    splitBullets.clear();
+
+                    for (Enemy e: enemies) {
+                        boolean survived = e.run();
+                        if (survived) {
+                            e.show();
+                            survivingEnemies.add(e);
+                        }
+                    }
+
+                    enemies = survivingEnemies;
+
+                    for (int i = 0; i <= mists.size(); i++) {
+                        for (Mist m: mists) {
+                            if (!m.exists) {
+                                mists.remove(m);
+                                break;
+                            }
+                        }
+                    }
+
+                    for (Bullet b: bullets) {
+                        for (int i = 1; i <= timesToRun; i++)
+                        b.run();
+                        b.show();
+                    }
+
+                    if (previousGrazeAchievementCounter == grazeAchievementCounter) grazeAchievementCounter = 0;
+
+                    previousGrazeAchievementCounter = grazeAchievementCounter;
+
+                    for (Mist m: mists) {
+                        for (int i = 1; i <= timesToRun; i++)
+                        m.run();
+                        m.show();
+                    }
+
+                    for (int i = 1; i <= timesToRun; i++)
+                    p.run();
+                    p.show();
+
+                    for (int index = 0; index < NUM_ACHIEVEMENTS; index++) {
+                        if (grazeAchievementCounter >= (index + 1) * 10) grazeAchievementQueued[index] = true;
+
+                        if (!grazeAchievementEarned[index] && grazeAchievementQueued[index]) {
+                            grazeAchievementEarned[index] = true;
+                            grazeAchievementShow[index] = true;
+                        }
+
+                        if (grazeAchievementShow[index]) notificationShowTimer++;
+                    }
+                }
+            } else if (currentLevel == 1) {
+                if (shouldRestart) {
+                    text("R: Restart               H: Main menu", width / 2, height / 2);
+                    return;
+                }
+
+
+                if (!paused) {
+                    //gridShow();
+
+                    for (int i = 1; i <= timesToRun; i++) {
+                        playTimer += 1 / frameRate;
+                    }
+
+                    for (int i = 1; i <= timesToRun; i++)
+                    p.move();
+
+                    fill(127.5, 175);
+                    rect(width / 2, height / 2, width, height + 2);
+
+                    for (int i = 1; i <= timesToRun; i++)
+                    l1.createEnemies();
+
+                    for (int i = 0; i <= 5; i++) {
+                        for (Bullet b: bullets) {
+                            if (!b.exists) {
+                                bullets.remove(b);
+                                break;
+                            }
+                        }
+                    }
+                    for (Bullet b: splitBullets)
+                    bullets.add(b);
+
+                    splitBullets.clear();
+
+                    ArrayList < Enemy > survivingEnemies = new ArrayList < Enemy > ();
+
+                    for (Enemy e: enemies) {
+                        boolean survived = e.run();
+                        if (survived) {
+                            e.show();
+                            survivingEnemies.add(e);
+                        }
+                    }
+
+                    enemies = survivingEnemies;
+
+                    for (int i = 0; i <= mists.size(); i++) {
+                        for (Mist m: mists) {
+                            if (!m.exists) {
+                                mists.remove(m);
+                                break;
+                            }
+                        }
+                    }
+
+                    for (Bullet b: bullets) {
+                        for (int i = 1; i <= timesToRun; i++)
+                        b.run();
+                        b.show();
+                    }
+
+                    for (Mist m: mists) {
+                        for (int i = 1; i <= timesToRun; i++)
+                        m.run();
+                        m.show();
+                    }
+
+                    for (int i = 1; i <= timesToRun; i++)
+                    p.run();
+                    p.show();
+                }
+
+                if (score >= 100) level1Score1AchievementQueued = true;
+                if (!level1Score1AchievementEarned && level1Score1AchievementQueued && notificationShowTimer == 0) {
+                    level1Score1AchievementEarned = true;
+                    level1Score1AchievementShow = true;
+                }
+                if (level1Score1AchievementShow) notificationShowTimer++;
+                if (kills == 9) level1KillsAchievementQueued = true;
+                if (!level1KillsAchievementEarned && level1KillsAchievementQueued && notificationShowTimer == 0) {
+                    level1KillsAchievementEarned = true;
+                    level1KillsAchievementShow = true;
+                }
+                if (level1KillsAchievementShow) notificationShowTimer++;
+            } else if (currentLevel == 2) {
+                if (shouldRestart) {
+                    text("R: Restart               H: Main menu", width / 2, height / 2);
+                    return;
+                }
+
+
+                if (!paused) {
+                    //gridShow();
+
+                    for (int i = 1; i <= timesToRun; i++) {
+                        playTimer += 1 / frameRate;
+                    }
+
+                    for (int i = 1; i <= timesToRun; i++)
+                    p.move();
+
+                    fill(127.5, 175);
+                    rect(width / 2, height / 2, width, height + 2);
+
+                    for (int i = 1; i <= timesToRun; i++)
+                    l2.createEnemies();
+
+                    for (int i = 0; i <= 5; i++) {
+                        for (Bullet b: bullets) {
+                            if (!b.exists) {
+                                bullets.remove(b);
+                                break;
+                            }
+                        }
+                    }
+                    for (Bullet b: splitBullets)
+                    bullets.add(b);
+
+                    splitBullets.clear();
+
+                    ArrayList < Enemy > survivingEnemies = new ArrayList < Enemy > ();
+
+                    for (Enemy e: enemies) {
+                        boolean survived = e.run();
+                        if (survived) {
+                            e.show();
+                            survivingEnemies.add(e);
+                        }
+                    }
+
+                    enemies = survivingEnemies;
+
+                    for (int i = 0; i <= mists.size(); i++) {
+                        for (Mist m: mists) {
+                            if (!m.exists) {
+                                mists.remove(m);
+                                break;
+                            }
+                        }
+                    }
+
+                    for (Bullet b: bullets) {
+                        for (int i = 1; i <= timesToRun; i++)
+                        b.run();
+                        b.show();
+                    }
+
+                    for (Mist m: mists) {
+                        for (int i = 1; i <= timesToRun; i++)
+                        m.run();
+                        m.show();
+                    }
+
+                    for (int i = 1; i <= timesToRun; i++)
+                    p.run();
+                    p.show();
+                }
+
+                if (score >= 100) level1Score1AchievementQueued = true;
+                if (!level1Score1AchievementEarned && level1Score1AchievementQueued && notificationShowTimer == 0) {
+                    level1Score1AchievementEarned = true;
+                    level1Score1AchievementShow = true;
+                }
+                if (level1Score1AchievementShow) notificationShowTimer++;
+                if (kills == 9) level1KillsAchievementQueued = true;
+                if (!level1KillsAchievementEarned && level1KillsAchievementQueued && notificationShowTimer == 0) {
+                    level1KillsAchievementEarned = true;
+                    level1KillsAchievementShow = true;
+                }
+                if (level1KillsAchievementShow) notificationShowTimer++;
+            }
+
+            textAlign(LEFT, TOP);
+            fill(0);
+            text("Score: " + round(score), 0, 0);
+            textAlign(CENTER, TOP);
+            text("Kills: " + kills, width / 2, 0);
+            text("Graze: " + graze, width / 2, FONT_SIZE);
+            text("Time: ", width / 2, FONT_SIZE * 2);
+            text(round(playTimer), width / 2, FONT_SIZE * 3);
+            textAlign(RIGHT, TOP);
+            text("Bombs: " + bombNum, width, 0);
+
+            showAchievementsNotifications();
+
+            if (currentLevel != 0 && levelComplete) {
+                if (currentLevel == 1) {
+                    if (!level1Complete) perkPoints += 3;
+                    level1Complete = true;
+                } else if (currentLevel == 2) {
+                    if (!level2Complete) perkPoints += 15;
+                    level2Complete = true;
+                }
+                textAlign(CENTER, CENTER);
+                text("Congratz!", width / 2, height / 2);
+                //if (inAutoSaveMode)
+                //saveMenu();
+            }
+        }
+    }
+
+    void showGrid() {
+        for (int x = BACKGROUND_SQUARE_SPACING / 2; x <= width; x += BACKGROUND_SQUARE_SPACING) {
+            for (int y = BACKGROUND_SQUARE_SPACING / 2; y <= height; y += BACKGROUND_SQUARE_SPACING) {
+                backgroundSquares[x][y].run();
+                backgroundSquares[x][y].show();
+            }
+        }
+    }
+
+    void showAchievementsNotifications() {
+        for (int index = 0; index < NUM_ACHIEVEMENTS; index++) {
+            if (grazeAchievementShow[index]) {
+                if (notificationShowTimer > 180) {
+                    grazeAchievementShow[index] = false;
+                    notificationShowTimer = 0;
+                    perkPoints++;
+                    //if (inAutoSaveMode)
+                    //saveMenu();
+                }
+
+                showText("Achievement unlocked: Graze Combo " + (index + 1), width / 2, height);
+                return;
+            }
+        }
+
+        if (level1KillsAchievementShow) {
+            if (notificationShowTimer > 180) {
+                level1KillsAchievementShow = false;
+                notificationShowTimer = 0;
+                perkPoints += 4;
+                //if (inAutoSaveMode)
+                //saveMenu();
+            }
+
+            showText("Achievement unlocked: Level 1 Kills 1", width / 2, height);
+            return;
+        }
+
+        if (level1Score1AchievementShow) {
+            if (notificationShowTimer > 180) {
+                level1Score1AchievementShow = false;
+                notificationShowTimer = 0;
+                perkPoints += 12;
+                //if (inAutoSaveMode)
+                //saveMenu();
+            }
+
+            showText("Achievement unlocked: Level 1 Score 1", width / 2, height);
+            return;
+        }
+    }
+
+    void showText(String str, int x, int y) {
+        fill(0);
+        textAlign(CENTER, BOTTOM);
+        text(str, x, y);
+
+        notificationShowTimer++;
+    }
+
+    void showAchievementList() {
+        float fontSize = FONT_SIZE;
+        fill(0);
+        textAlign(CENTER, TOP);
+        text("Survival Mode", width / 2, 0);
+        text("Graze Combo 1: Get at least 10 continuous graze (Reward: 1)", width / 2, fontSize);
+        text("Graze Combo 2: Get at least 20 continuous graze (Reward: 1)", width / 2, fontSize * 2);
+        text("Graze Combo 3: Get at least 30 continuous graze (Reward: 1)", width / 2, fontSize * 3);
+        text("Level Mode", width / 2, fontSize * 5);
+        text("Level 1 Kills: Get 9 kills on level 1 (Reward: 4)", width / 2, fontSize * 6);
+        text("Level 1 Score 1: Get 0 score on level 1 (Reward: 12)", width / 2, fontSize * 7);
+    }
+
+    class BackgroundSquare {
+        PVector loc;
+        int backgroundSquareSize;
+        int[] adjacentSqaures;
+
+        BackgroundSquare(PVector loc, int backgroundSquareSize, int[] adjacentSqaures) {
+            this.loc = loc;
+            this.backgroundSquareSize = backgroundSquareSize;
+            this.adjacentSqaures = adjacentSqaures;
+        }
+
+        void show() {
+            fill(0, 0);
+            stroke(0, 255);
+            rect(loc.x, loc.y, backgroundSquareSize, backgroundSquareSize);
+            noStroke();
+        }
+
+        void run() {}
+    }
+
+    class Boss {
+        PVector vel, loc, wayPoint0, wayPoint1, wayPoint2;
+        int timer2, shootTimeCurrent2, shootTimeDeadline2, state, state2, bossSize, currentWayPoint, enemySize, hp, shootTimeCurrent, shootTimeDeadline, xpValue, currentSection, timer;
+        float speed, bulletSpeed, shootAngleModifier, shootAngleModifier2;
+        boolean facingRight, turnCW;
+
+        Boss(PVector wayPoint0, PVector wayPoint1, PVector wayPoint2, PVector vel, PVector loc, int timer2, int shootTimeCurrent2, int shootTimeDeadline2, int state, int state2, int currentWayPoint, int bossSize, int hp, int shootTimeCurrent, int shootTimeDeadline, int xpValue, int currentSection, int timer, float rotateAmount, float speed, float bulletSpeed, float shootAngleModifier, float shootAngleModifier2, boolean facingRight, boolean turnCW) {
+            this.wayPoint0 = wayPoint0;
+            this.wayPoint1 = wayPoint1;
+            this.wayPoint2 = wayPoint2;
+            this.vel = vel;
+            this.loc = loc;
+            this.timer2 = timer2;
+            this.shootTimeCurrent2 = shootTimeCurrent2;
+            this.shootTimeDeadline2 = shootTimeDeadline2;
+            this.state = state;
+            this.state2 = state2;
+            this.bossSize = bossSize;
+            this.hp = hp;
+            this.shootTimeCurrent = shootTimeCurrent;
+            this.shootTimeDeadline = shootTimeDeadline;
+            this.xpValue = xpValue;
+            this.currentSection = currentSection;
+            this.timer = timer;
+            this.speed = speed;
+            this.bulletSpeed = bulletSpeed;
+            this.facingRight = facingRight;
+            this.shootAngleModifier = shootAngleModifier;
+            this.shootAngleModifier2 = shootAngleModifier2;
+            this.facingRight = facingRight;
+            this.turnCW = turnCW;
+        }
+
+        void show() {
+            fill(255, 0, 0);
+            ellipse(loc.x, loc.y, bossSize, bossSize);
+        }
+
+        void run() {}
+
+        void shootBulletStraightFrom(PVector targetLoc, PVector shootLoc, float rotateAmount, float spreadRange, float bulletSpeed, int wiggleChangeDeadline, int wiggleChangeTimer, int wiggleAmount, int bulletSize, int bulletNum, boolean bounce) {
+            PVector targetLoc2 = copy(loc);
+            float m = bossSize / 2;
+            float a = targetLoc2.heading2D();
+            a += shootAngleModifier;
+            targetLoc2.x += m * cos(a);
+            targetLoc2.y += m * sin(a);
+            PVector shootLoc2 = new PVector();
+            float m2 = bossSize / 2;
+            float a2 = shootLoc2.heading2D();
+            a2 = PVector.angleBetween(loc, targetLoc2);
+            shootLoc2.x += m2 * cos(a2);
+            shootLoc2.y += m2 * sin(a2);
+            bullets.add(new BulletStraight(copy(PVector.sub(targetLoc2, loc)), copy(targetLoc2), bulletSize, wiggleAmount, wiggleChangeTimer, wiggleChangeDeadline, -1, -1, bulletSpeed, rotateAmount, false, bounce));
+        }
+
+        void shootBulletStraightTowards(PVector targetLoc, PVector shootLoc, float rotateAmount, float spreadRange, float bulletSpeed, int wiggleChangeDeadline, int wiggleChangeTimer, int wiggleAmount, int bulletSize, int bulletNum, boolean bounce) {
+            bullets.add(new BulletStraight(copy(targetLoc), copy(shootLoc), bulletSize, wiggleAmount, wiggleChangeTimer, wiggleChangeDeadline, -1, -1, bulletSpeed, rotateAmount, false, bounce));
+        }
+
+        void shootBulletWiggleTowards(PVector targetLoc, PVector wiggleVel, float rotateAmount, float spreadRange, float bulletSpeed, int wiggleChangeDeadline, int wiggleChangeTimer, int wiggleAmount, int bulletSize, int bulletNum) {
+            PVector spreadLoc = copy(targetLoc);
+            float m = spreadLoc.mag();
+            for (float a = spreadLoc.heading2D(); a <= spreadLoc.heading2D() + spreadRange * 2; a += spreadRange / bulletNum) {
+                bullets.add(new BulletWiggle(copy(spreadLoc), copy(loc), bulletSize, wiggleAmount, wiggleChangeTimer, wiggleChangeDeadline, -1, -1, bulletSpeed, rotateAmount, false));
+                spreadLoc.x = m * cos(a);
+                spreadLoc.y = m * sin(a);
+            }
+        }
+    }
+
+    class Boss1 extends Boss {
+        PVector direction;
+
+        Boss1(PVector wayPoint0, PVector wayPoint1, PVector wayPoint2, PVector vel, PVector loc, int timer2, int shootTimeCurrent2, int shootTimeDeadline2, int state, int state2, int currentWayPoint, int bossSize, int hp, int shootTimeCurrent, int shootTimeDeadline, int xpValue, int currentSection, int timer, float rotateAmount, float speed, float bulletSpeed, float shootAngleModifier, float shootAngleModifier2, boolean facingRight, boolean turnCW) {
+            super(wayPoint0, wayPoint1, wayPoint2, vel, loc, timer2, shootTimeCurrent2, shootTimeDeadline2, state, state2, currentWayPoint, bossSize, hp, shootTimeCurrent, shootTimeDeadline, xpValue, currentSection, timer, rotateAmount, speed, bulletSpeed, shootAngleModifier, shootAngleModifier2, facingRight, turnCW);
+            direction = PVector.sub(p.loc, loc);
+        }
+
+        void show() {
+            super.show();
+        }
+
+        void run() {
+            prinasdtlasflnkn(hp);
+            if (timer2 >= 2000) wayPoint2 = new PVector(width + 100, height / 2 - 100);
+            timer2++;
+            if (hp < 200 || timer2 >= 1000) currentSection = 2;
+            else if ((loc.dist(wayPoint0) <= speed && wayPoint1.equals(NO_WAYPOINT)) || (loc.dist(wayPoint1) <= speed && wayPoint2.equals(NO_WAYPOINT)) || (loc.dist(wayPoint2) <= speed && wayPoint0.equals(NO_WAYPOINT))) currentSection = 1;
+            if (loc.dist(wayPoint2) <= speed) hp = 0;
+
+            if (currentSection == 1) {
+                shootAngleModifier += 1;
+                shootTimeDeadline = 13;
+                shootTimeCurrent++;
+                if (shootTimeCurrent >= shootTimeDeadline) {
+                    for (float a = shootAngleModifier; a < shootAngleModifier + TWO_PI; a += TWO_PI / 13) {
+                        direction.x = cos(a);
+                        direction.y = sin(a);
+                        shootBulletStraightTowards(copy(direction), copy(loc), a, TWO_PI, 7.5, 17, 0, 0, 30, 1, false);
+                    }
+                    shootTimeCurrent = 0;
+                }
+            } else if (currentSection == 2) {
+                int timerDeadline;
+                if (timer == 0) {
+                    shootAngleModifier = 0;
+                    for (int x = 10; x <= width; x += 100) {
+                        enemies.add(new EnemyShootBulletStraightTowardsPredicted(new PVector[0], new PVector(x, height - 200), new PVector(x, height - 200), new PVector(x, 200), new PVector(x, 200), new PVector(), new PVector(x, -50), 2, 100, 999999999, 0, 999999999, 8, 160, 1.0, 8.5, true, true));
+                        enemies.add(new EnemyShootBulletStraightTowardsPredicted(new PVector[0], new PVector(x, height - 200), new PVector(x, height - 200), new PVector(x, height - 200), new PVector(x, height - 200), new PVector(), new PVector(x, height + 50), 2, 100, 999999999, 0, 999999999, 8, 160, 1.0, 8.5, true, true));
+                    }
+                }
+                timer++;
+                if (state2 == 1) timerDeadline = 181;
+                else timerDeadline = 91;
+                if (timer >= timerDeadline) {
+                    timer = 1;
+                    if (state >= 0) {
+                        state = -1;
+                    } else {
+                        state = 1;
+                        if (state2 == 1) state2 = -1;
+                        else state2 = 1;
+                    }
+                    if (state2 == -1 && state == 1) state2 = 1;
+                }
+                if (state == 1) shootAngleModifier += .005;
+                else if (state == -1) shootAngleModifier -= .005;
+                shootTimeDeadline = 3;
+                shootTimeCurrent++;
+                shootTimeCurrent2++;
+                if (timer2 >= 60) {
+                    if (shootTimeCurrent >= shootTimeDeadline) {
+                        PVector bulletVel = new PVector(-1, 0);
+                        float m = bulletVel.mag();
+                        float a = bulletVel.heading2D();
+                        a += shootAngleModifier;
+                        bulletVel.x = m * cos(a);
+                        bulletVel.y = m * sin(a);
+                        shootBulletStraightTowards(copy(bulletVel), copy(new PVector(loc.x, loc.y - (bossSize / 2))), 0, -1, 7.5, 17, 0, 0, 30, 1, false);
+                        shootBulletStraightTowards(copy(bulletVel), copy(new PVector(loc.x, loc.y + (bossSize / 2))), 0, -1, 7.5, 17, 0, 0, 30, 1, false);
+                        shootTimeCurrent = 0;
+                    }
+                    if (shootTimeCurrent2 >= shootTimeDeadline2) {
+                        shootBulletStraightTowards(PVector.sub(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y), loc), copy(loc), 0, -1, 5.0, 17, 0, 0, 30, 1, false);
+                        shootTimeCurrent2 = 0;
+                    }
+                }
+            }
+            if (currentWayPoint == 0 && !wayPoint1.equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoint1, loc));
+            if (currentWayPoint == 1 && !wayPoint2.equals(NO_WAYPOINT)) vel.set(PVector.sub(loc, wayPoint2));
+            if (currentWayPoint == 2 && !wayPoint0.equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoint0, loc));
+            vel.mult(MAX_INT);
+            vel.limit(speed);
+            loc.add(vel);
+            if (loc.dist(wayPoint0) <= speed) currentWayPoint = 1;
+            if (loc.dist(wayPoint1) <= speed) currentWayPoint = 2;
+            if (loc.dist(wayPoint2) <= speed) currentWayPoint = 0;
+        }
+    }
+
+    class Boss2 extends Boss {
+        boolean runOnce;
+
+        Boss2(PVector wayPoint0, PVector wayPoint1, PVector wayPoint2, PVector vel, PVector loc, int timer2, int shootTimeCurrent2, int shootTimeDeadline2, int state, int state2, int currentWayPoint, int bossSize, int hp, int shootTimeCurrent, int shootTimeDeadline, int xpValue, int currentSection, int timer, float rotateAmount, float speed, float bulletSpeed, float shootAngleModifier, float shootAngleModifier2, boolean facingRight, boolean turnCW) {
+            super(wayPoint0, wayPoint1, wayPoint2, vel, loc, timer2, shootTimeCurrent2, shootTimeDeadline2, state, state2, currentWayPoint, bossSize, hp, shootTimeCurrent, shootTimeDeadline, xpValue, currentSection, timer, rotateAmount, speed, bulletSpeed, shootAngleModifier, shootAngleModifier2, facingRight, turnCW);
+            runOnce = true;
+        }
+
+        void show() {
+            super.show();
+        }
+
+        void run() {
+            prinasdtlasflnkn(timer2);
+            if (timer2 >= 2000) wayPoint2 = new PVector(width + 100, height / 2 - 100);
+            timer2++;
+            if (hp < 200 || timer2 >= 1000) currentSection = 2;
+            else if ((loc.dist(wayPoint0) <= speed && wayPoint1.equals(NO_WAYPOINT)) || (loc.dist(wayPoint1) <= speed && wayPoint2.equals(NO_WAYPOINT)) || (loc.dist(wayPoint2) <= speed && wayPoint0.equals(NO_WAYPOINT))) currentSection = 1;
+            if (loc.dist(wayPoint2) <= speed) hp = 0;
+
+            if (currentSection == 1) {
+                if (timer2 % 65 == 0) {
+                    for (int x = 0; x <= width; x += 100)
+                    bullets.add(new BulletStraight(new PVector(0, -1), new PVector(x, width - 25), 50, -1, -1, -1, -1, 50, 2.0, 0.0, false, false));
+                    for (int x = -50; x <= width - 50; x += 100)
+                    bullets.add(new BulletStraight(new PVector(0, 1), new PVector(x, -25), 50, -1, -1, -1, -1, 50, 2.0, 0.0, false, false));
+                }
+                shootTimeDeadline = 120;
+                shootTimeCurrent++;
+                if (shootTimeCurrent >= shootTimeDeadline) {
+                    BulletSplit b = new BulletSplit(new PVector(-1, 0), copy(loc), 20, -1, -1, -1, MAX_INT, 27, 2.5, 7.5, -1.0, false);
+                    bullets.add(b);
+                    bulletSplits.add(b);
+                    shootTimeCurrent = 0;
+                }
+                for (BulletSplit b: bulletSplits) {
+                    if (b.loc.x <= b.bulletSize) b.splitTimeCurrent = MAX_INT;
+                }
+            } else if (currentSection == 2) {
+                if (runOnce) {
+                    bullets.clear();
+                    bulletSplits.clear();
+                    splitBullets.clear();
+                    runOnce = false;
+                }
+                if (timer2 % 3 == 0) {
+                    shootAngleModifier += TWO_PI / 25;
+                    PVector bulletLoc = new PVector();
+                    bulletLoc.x = cos(shootAngleModifier);
+                    bulletLoc.y = sin(shootAngleModifier);
+                    bulletLoc.mult(MAX_INT);
+                    bulletLoc.limit(375);
+                    PVector direction = copy(p.loc);
+                    direction.add(bulletLoc);
+                    bullets.add(new BulletStraight(PVector.sub(p.loc, direction), PVector.add(p.loc, bulletLoc), 20, -1, -1, -1, -1, 50, 2.0, 0.0, false, false));
+                }
+            }
+            if (currentWayPoint == 0 && !wayPoint1.equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoint1, loc));
+            if (currentWayPoint == 1 && !wayPoint2.equals(NO_WAYPOINT)) vel.set(PVector.sub(loc, wayPoint2));
+            if (currentWayPoint == 2 && !wayPoint0.equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoint0, loc));
+            vel.mult(MAX_INT);
+            vel.limit(speed);
+            loc.add(vel);
+            if (loc.dist(wayPoint0) <= speed) currentWayPoint = 1;
+            if (loc.dist(wayPoint1) <= speed) currentWayPoint = 2;
+            if (loc.dist(wayPoint2) <= speed) currentWayPoint = 0;
+        }
+    }
+
+    abstract class Bullet {
+        PVector vel, loc;
+        int bulletSize;
+        float speed;
+        boolean madeByPlayer, exists;
+
+        Bullet(PVector vel, PVector loc, int bulletSize, float speed, boolean madeByPlayer) {
+            this.vel = vel;
+            this.loc = loc;
+            this.bulletSize = bulletSize;
+            this.speed = speed;
+            this.exists = true;
+            this.madeByPlayer = madeByPlayer;
+        }
+
+        void show() {
+            noStroke();
+            ellipse(loc.x, loc.y, bulletSize, bulletSize);
+            fill(255, 70);
+            ellipse(loc.x, loc.y, bulletSize + 50, bulletSize + 50);
+        }
+
+        void run() {
+            for (Enemy e: enemies) {
+                if (madeByPlayer && loc.dist(e.loc) <= bulletSize / 2 + (e.enemySize / 2)) {
+                    exists = false;
+                    e.hp--;
+                }
+            }
+
+            if (madeByPlayer && loc.dist(b1.loc) <= bulletSize / 2 + (b1.bossSize / 2)) {
+                exists = false;
+                b1.hp--;
+            } else if (madeByPlayer && loc.dist(b2.loc) <= bulletSize / 2 + (b2.bossSize / 2)) {
+                exists = false;
+                b2.hp--;
+            }
+
+            if (b1.hp <= 0) {
+                if (currentLevel == 1) l1.showBoss = false;
+                else if (currentLevel == 2) l2.showBoss = false;
+                levelComplete = true;
+                kills++;
+                paused = true;
+            }
+
+            if (!madeByPlayer && loc.dist(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y)) <= bulletSize / 2) shouldRestart = true;
+
+            vel.mult(MAX_INT);
+            vel.limit(speed);
+            loc.add(vel);
+
+            if (loc.dist(new PVector(width / 2, height / 2)) >= width * 2 + (bulletSize / 2)) exists = false;
+
+            if (!madeByPlayer && loc.dist(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y)) <= bulletSize / 2 + 22.5) {
+                float grazeIntoScoreModifier2 = 0;
+                if (perkEquiped[4] == 1) grazeIntoScoreModifier2 = grazeIntoScoreModifier;
+                score += .175 + grazeIntoScoreModifier2;
+                graze++;
+                if (currentLevel == 0) grazeAchievementCounter++;
+            }
+        }
+    }
+
+    class BulletSplit extends Bullet {
+        PVector wiggleVel;
+        int wiggleAmount, splitTimeCurrent, splitTimeDeadline, splitNum, wiggleChangeTimer, wiggleChangeDeadline;
+        float rotateAmount, bulletSpeed;
+        boolean hasWiggled;
+
+        BulletSplit(PVector vel, PVector loc, int bulletSize, int wiggleAmount, int wiggleChangeTimer, int wiggleChangeDeadline, int splitTimeDeadline, int splitNum, float bulletSpeed, float speed, float rotateAmount, boolean madeByPlayer) {
+            super(vel, loc, bulletSize, speed, madeByPlayer);
+            this.vel = vel;
+            this.loc = loc;
+            this.bulletSize = bulletSize;
+            this.bulletSpeed = bulletSpeed;
+            this.speed = speed;
+            this.madeByPlayer = madeByPlayer;
+            this.splitTimeCurrent = 0;
+            this.splitTimeCurrent = splitTimeCurrent;
+            this.splitTimeDeadline = splitTimeDeadline;
+            this.splitNum = splitNum;
+        }
+
+        void show() {
+            if (madeByPlayer) fill(0, 255, 0);
+            else fill(255, 0, 255);
+
+            super.show();
+        }
+
+        void run() {
+            super.run();
+
+            if (splitTimeCurrent >= splitTimeDeadline) {
+                PVector rotateAmount = PVector.sub(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y), loc);
+                exists = false;
+                float m = rotateAmount.mag();
+
+                for (float a = rotateAmount.heading2D(); a <= PVector.sub(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y), loc).heading2D() + TWO_PI; a += TWO_PI / splitNum) {
+                    rotateAmount.x = m * cos(a);
+                    rotateAmount.y = m * sin(a);
+                    splitBullets.add(new BulletStraight(copy(rotateAmount), copy(loc), bulletSize, -1, -1, -1, -1, -1, bulletSpeed, 0.0, false, false));
+                }
+                splitTimeCurrent = 0;
+            }
+            splitTimeCurrent++;
+        }
+    }
+
+    class BulletStraight extends Bullet {
+        PVector wiggleVel;
+        int wiggleAmount, wiggleChangeTimer, wiggleChangeDeadline;
+        float rotateAmount;
+        boolean hasWiggled, bounce;
+
+        BulletStraight(PVector vel, PVector loc, int bulletSize, int wiggleAmount, int wiggleChangeTimer, int wiggleChangeDeadline, int splitTimeDeadline, int splitNum, float speed, float rotateAmount, boolean madeByPlayer, boolean bounce) {
+            super(vel, loc, bulletSize, speed, madeByPlayer);
+            this.bounce = bounce;
+        }
+
+        void show() {
+            if (madeByPlayer) fill(0, 255, 0);
+            else fill(255, 127.5, 0);
+
+            super.show();
+        }
+
+        void run() {
+            if (bounce) {
+                if (loc.y >= height - (bulletSize / 2) || loc.y <= bulletSize / 2) vel.y *= -1;
+                else if (loc.x >= width - (bulletSize / 2) || loc.x <= bulletSize / 2) vel.x *= -1;
+            }
+            super.run();
+        }
+    }
+
+    class BulletWiggle extends Bullet {
+        PVector wiggleVel;
+        int wiggleAmount, wiggleChangeTimer, wiggleChangeDeadline;
+        float rotateAmount;
+        boolean hasWiggled;
+
+        BulletWiggle(PVector vel, PVector loc, int bulletSize, int wiggleAmount, int wiggleChangeTimer, int wiggleChangeDeadline, int splitTimeDeadline, int splitNum, float speed, float rotateAmount, boolean madeByPlayer) {
+            super(vel, loc, bulletSize, speed, madeByPlayer);
+            this.wiggleVel = new PVector();
+            this.wiggleAmount = wiggleAmount;
+            this.wiggleChangeTimer = 0;
+            this.wiggleChangeDeadline = wiggleChangeDeadline;
+            this.rotateAmount = rotateAmount;
+            this.hasWiggled = false;
+        }
+
+        void show() {
+            if (madeByPlayer) fill(0, 255, 0);
+            else fill(BULLET_WIGGLE_COLOR);
+
+            super.show();
+        }
+
+        void run() {
+            vel.limit(speed);
+            if (wiggleChangeTimer >= wiggleChangeDeadline) {
+                float m = wiggleAmount;
+                if (!hasWiggled) {
+                    wiggleVel.set(vel);
+                    float a = wiggleVel.heading2D();
+                    hasWiggled = true;
+                    a -= rotateAmount / 2;
+                    wiggleVel.x = m * cos(a);
+                    wiggleVel.y = m * sin(a);
+                } else {
+                    float a = wiggleVel.heading2D();
+                    if (a == vel.heading2D() + (rotateAmount / 2)) a -= rotateAmount;
+                    else a += rotateAmount;
+                    wiggleVel.x = m * cos(a);
+                    wiggleVel.y = m * sin(a);
+                }
+                wiggleChangeTimer = 0;
+            }
+            wiggleChangeTimer++;
+
+            loc.add(wiggleVel);
+            super.run();
+        }
+    }
+
+    class Button {
+        PVector loc, buttonSize;
+        float fontSize;
+        boolean beingPressed, pressed, isVisible;
+        color buttonColor;
+        String text2;
+
+        Button(PVector loc, float fontSize, String text2) {
+            this.loc = loc;
+            this.fontSize = fontSize;
+            this.text2 = text2;
+            buttonSize = new PVector(textWidth(text2) + 50, fontSize + 50);
+            buttonColor = color(100);
+            beingPressed = false;
+            pressed = false;
+            isVisible = false;
+        }
+
+        void show() {
+            if (!isVisible) return;
+
+            fill(buttonColor);
+            rect(loc.x, loc.y, buttonSize.x, buttonSize.y);
+            fill(0);
+            textAlign(CENTER, CENTER);
+            text("" + text2, loc.x, loc.y);
+        }
+
+        void run() {
+            if (mousePressed && mouseX > loc.x - (buttonSize.x / 2) && mouseX < loc.x + (buttonSize.x / 2) && mouseY > loc.y - (buttonSize.y / 2) && mouseY < loc.y + (buttonSize.y / 2)) {
+                beingPressed = true;
+                buttonColor = color(175);
+            } else buttonColor = color(100);
+        }
+    }
+
+    abstract class Enemy {
+        PVector[] wayPoints;
+        PVector vel, loc, wayPoint0, wayPoint1, wayPoint2, wayPoint3;
+        int currentWayPoint, enemySize, hp, shootTimeCurrent, shootTimeDeadline, xpValue;
+        float speed, bulletSpeed;
+        boolean facingRight, destroyAfterDestination;
+
+        Enemy(PVector[] wayPoints, PVector wayPoint0, PVector wayPoint1, PVector wayPoint2, PVector wayPoint3, PVector vel, PVector loc, int currentWayPoint, int enemySize, int hp, int shootTimeCurrent, int shootTimeDeadline, int xpValue, float speed, float bulletSpeed, boolean facingRight, boolean destroyAfterDestination) {
+            this.wayPoint0 = wayPoint0;
+            this.wayPoint1 = wayPoint1;
+            this.wayPoint2 = wayPoint2;
+            this.wayPoint3 = wayPoint3;
+            this.vel = vel;
+            this.loc = loc;
+            this.enemySize = enemySize;
+            this.hp = hp;
+            this.shootTimeCurrent = shootTimeCurrent;
+            this.shootTimeDeadline = shootTimeDeadline;
+            this.xpValue = xpValue;
+            this.speed = speed;
+            this.bulletSpeed = bulletSpeed;
+            this.facingRight = facingRight;
+            this.destroyAfterDestination = destroyAfterDestination;
+            this.wayPoints = wayPoints;
+        }
+
+        void show() {
+            fill(255, 0, 0);
+            ellipse(loc.x, loc.y, enemySize, enemySize);
+            if (showEffects) {
+                for (int i = 0; i <= 20; i++) {
+                    int r = int(random(1, 10));
+                    if (r == 1) {
+                        PVector offset = new PVector();
+                        offset.x = random(-1, 1);
+                        offset.y = random(-1, 1);
+                        offset.mult(MAX_INT);
+                        offset.limit(random(enemySize / 2, enemySize / 2 + 10));
+                        mists.add(new Mist(PVector.add(loc, offset), int(random(127, 255))));
+                    }
+                }
+            }
+        }
+
+        //Returns true when the enemy survives
+        boolean run() {
+            if (wayPoints.length == 0) {
+                if (loc.dist(wayPoint3) <= speed && destroyAfterDestination) return false;
+                //prinasdtlasflnkn(currentWayPoint);
+                if (loc.dist(wayPoint0) <= speed && !wayPoint1.equals(NO_WAYPOINT)) currentWayPoint = 1;
+                if (loc.dist(wayPoint1) <= speed && !wayPoint2.equals(NO_WAYPOINT)) currentWayPoint = 2;
+                if (loc.dist(wayPoint2) <= speed && !wayPoint3.equals(NO_WAYPOINT)) currentWayPoint = 3;
+                if (loc.dist(wayPoint3) <= speed && !wayPoint0.equals(NO_WAYPOINT)) currentWayPoint = 0;
+
+                if (currentWayPoint == 0 && !wayPoint1.equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoint1, loc));
+                if (currentWayPoint == 1 && !wayPoint2.equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoint2, loc));
+                if (currentWayPoint == 2 && !wayPoint3.equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoint3, loc));
+                if (currentWayPoint == 3 && !wayPoint0.equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoint0, loc));
+            } else {
+                for (int i = 0; i < wayPoints.length; i++) {
+                    if (i < wayPoints.length - 1) {
+                        if (loc.dist(wayPoints[i]) <= speed && !wayPoints[currentWayPoint].equals(NO_WAYPOINT)) currentWayPoint = i + 1;
+                        if (currentWayPoint == i + 1 && !wayPoints[i + 1].equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoints[i + 1], loc));
+                    } else {
+                        if (loc.dist(wayPoints[wayPoints.length - 1]) <= speed && !wayPoints[0].equals(NO_WAYPOINT)) {
+                            if (destroyAfterDestination) return false;
+                            currentWayPoint = 0;
+                        }
+                        if (currentWayPoint == 0 && !wayPoints[0].equals(NO_WAYPOINT)) vel.set(PVector.sub(wayPoints[0], loc));
+                    }
+                }
+            }
+
+            vel.mult(MAX_INT);
+            vel.limit(speed);
+            loc.add(vel);
+
+            if (p.loc.x - (p.playerSize / 2) > loc.x) facingRight = true;
+            else facingRight = false;
+
+            shootTimeCurrent++;
+
+            if (hp <= 0) {
+                float killsIntoScoreModifier2 = 0;
+                if (perkEquiped[6] == 1) killsIntoScoreModifier2 = killsIntoScoreModifier;
+                score += xpValue + killsIntoScoreModifier2;
+                kills++;
+                return false;
+            } else return true;
+        }
+
+        void shootBulletStraightTowards(PVector targetLoc, float bulletSpeed, int bulletSize) {
+            bullets.add(new BulletStraight(copy(PVector.sub(targetLoc, loc)), copy(loc), bulletSize, -1, -1, -1, -1, -1, bulletSpeed, 0.0, false, false));
+
+            shootTimeCurrent = 0;
+        }
+
+        void shootBulletWiggleTowards(PVector targetLoc, PVector wiggleVel, float rotateAmount, float spreadRange, float bulletSpeed, int wiggleChangeDeadline, int wiggleChangeTimer, int wiggleAmount, int bulletSize, int bulletNum) {
+            PVector spreadLoc = copy(targetLoc);
+            float m = spreadLoc.mag();
+            bullets.add(new BulletWiggle(targetLoc, copy(loc), bulletSize, wiggleAmount, wiggleChangeTimer, wiggleChangeDeadline, -1, -1, bulletSpeed, rotateAmount, false));
+            for (float a = spreadLoc.heading2D() + (spreadRange / bulletNum / 2); a <= targetLoc.heading2D() + (spreadRange / 2); a += spreadRange / bulletNum / 2) {
+                spreadLoc.x = m * cos(a);
+                spreadLoc.y = m * sin(a);
+                bullets.add(new BulletWiggle(copy(spreadLoc), copy(loc), bulletSize, wiggleAmount, wiggleChangeTimer, wiggleChangeDeadline, -1, -1, bulletSpeed, rotateAmount, false));
+            }
+            spreadLoc = copy(targetLoc);
+            for (float a = spreadLoc.heading2D() - (spreadRange / bulletNum / 2); a >= targetLoc.heading2D() - (spreadRange / 2); a -= spreadRange / bulletNum / 2) {
+                spreadLoc.x = m * cos(a);
+                spreadLoc.y = m * sin(a);
+                bullets.add(new BulletWiggle(copy(spreadLoc), copy(loc), bulletSize, wiggleAmount, wiggleChangeTimer, wiggleChangeDeadline, -1, -1, bulletSpeed, rotateAmount, false));
+            }
+        }
+        void shootBulletWiggleTowards2(PVector targetLoc, PVector wiggleVel, float rotateAmount, float spreadRange, float bulletSpeed, int wiggleChangeDeadline, int wiggleChangeTimer, int wiggleAmount, int bulletSize, int bulletNum) {
+            PVector spreadLoc = copy(targetLoc);
+            float m = spreadLoc.mag();
+            for (float a = spreadLoc.heading2D(); a <= targetLoc.heading2D() + spreadRange; a += spreadRange / bulletNum) {
+                bullets.add(new BulletWiggle(copy(spreadLoc), copy(loc), bulletSize, wiggleAmount, wiggleChangeTimer, wiggleChangeDeadline, -1, -1, bulletSpeed, rotateAmount, false));
+                spreadLoc.x = m * cos(a);
+                spreadLoc.y = m * sin(a);
+            }
+        }
+
+        void moveTowardsYLoc(PVector targetLoc) {
+            final float OCCILATION_MODIFIER = .05;
+            vel.y += OCCILATION_MODIFIER * (targetLoc.y - loc.y);
+        }
+
+        void moveTowardsLoc(PVector targetLoc, float curvatureSetMag) {
+            PVector velChange = PVector.sub(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y), loc);
+            velChange.mult(MAX_INT);
+            velChange.limit(curvatureSetMag);
+            vel.add(velChange);
+        }
+
+        boolean isTimeToShoot() {
+            return shootTimeCurrent >= shootTimeDeadline;
+        }
+    }
+
+    class EnemyMoveTowardsPlayer extends Enemy {
+        EnemyMoveTowardsPlayer(PVector[] wayPoints, PVector wayPoint0, PVector wayPoint1, PVector wayPoint2, PVector wayPoint3, PVector vel, PVector loc, int currentWayPoint, int enemySize, int hp, int shootTimeCurrent, int shootTimeDeadline, int xpValue, float speed, float bulletSpeed, boolean facingRight, boolean destroyAfterDestination) {
+            super(wayPoints, wayPoint0, wayPoint1, wayPoint2, wayPoint3, vel, loc, currentWayPoint, enemySize, hp, shootTimeCurrent, shootTimeDeadline, xpValue, speed, bulletSpeed, facingRight, destroyAfterDestination);
+        }
+
+        void show() {
+            fill(ENEMY_COLOR);
+            super.show();
+        }
+
+        boolean run() {
+            if (isTimeToShoot()) {
+                Bullet b = new BulletSplit(PVector.sub(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y), loc), copy(loc), 20, -1, -1, -1, 60, 20, 8.0, 7.0, -1.0, false);
+                bullets.add(b);
+
+                shootTimeCurrent = 0;
+            }
+
+            moveTowardsYLoc(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y));
+            return super.run();
+        }
+    }
+
+    class EnemyMoveTowardsPredicted extends Enemy {
+        EnemyMoveTowardsPredicted(PVector[] wayPoints, PVector wayPoint0, PVector wayPoint1, PVector wayPoint2, PVector wayPoint3, PVector vel, PVector loc, int currentWayPoint, int enemySize, int hp, int shootTimeCurrent, int shootTimeDeadline, int xpValue, float speed, float bulletSpeed, boolean facingRight, boolean destroyAfterDestination) {
+            super(wayPoints, wayPoint0, wayPoint1, wayPoint2, wayPoint3, vel, loc, currentWayPoint, enemySize, hp, shootTimeCurrent, shootTimeDeadline, xpValue, speed, bulletSpeed, facingRight, destroyAfterDestination);
+        }
+
+        void show() {
+            fill(ENEMY_COLOR);
+            super.show();
+        }
+
+        boolean run() {
+            if (isTimeToShoot()) {
+                PVector direction;
+                if (facingRight) direction = new PVector(999999999, 0);
+                else direction = new PVector(-99999999, 0);
+                shootBulletStraightTowards(copy(direction), bulletSpeed, 20);
+            }
+
+            final int EXPECTED_PLAYER_SPEED = 20;
+            moveTowardsYLoc(PVector.add(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y), PVector.mult(p.vel, EXPECTED_PLAYER_SPEED)));
+
+            return super.run();
+        }
+    }
+
+    class EnemyShootHeadOn extends Enemy {
+        float curvatureLimit;
+        boolean destroyAfterDestination;
+
+        EnemyShootHeadOn(PVector[] wayPoints, PVector wayPoint0, PVector wayPoint1, PVector wayPoint2, PVector wayPoint3, PVector vel, PVector loc, int currentWayPoint, int enemySize, int hp, int shootTimeCurrent, int shootTimeDeadline, int xpValue, float curvatureLimit, float speed, float bulletSpeed, boolean facingRight, boolean destroyAfterDestination) {
+            super(wayPoints, wayPoint0, wayPoint1, wayPoint2, wayPoint3, vel, loc, currentWayPoint, enemySize, hp, shootTimeCurrent, shootTimeDeadline, xpValue, speed, bulletSpeed, facingRight, destroyAfterDestination);
+            this.curvatureLimit = curvatureLimit;
+        }
+
+        void show() {
+            fill(ENEMY_COLOR);
+            super.show();
+        }
+
+        boolean run() {
+            if (isTimeToShoot()) shootBulletStraightTowards(copy(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y)), bulletSpeed, 20);
+
+            moveTowardsLoc(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y), curvatureLimit);
+            return super.run();
+        }
+    }
+
+    class EnemyShootBulletStraightTowardsPredicted extends Enemy {
+        int bulletSize;
+
+        EnemyShootBulletStraightTowardsPredicted(PVector[] wayPoints, PVector wayPoint0, PVector wayPoint1, PVector wayPoint2, PVector wayPoint3, PVector vel, PVector loc, int currentWayPoint, int enemySize, int hp, int shootTimeCurrent, int shootTimeDeadline, int xpValue, int bulletSize, float speed, float bulletSpeed, boolean facingRight, boolean destroyAfterDestination) {
+            super(wayPoints, wayPoint0, wayPoint1, wayPoint2, wayPoint3, vel, loc, currentWayPoint, enemySize, hp, shootTimeCurrent, shootTimeDeadline, xpValue, speed, bulletSpeed, facingRight, destroyAfterDestination);
+            this.bulletSize = bulletSize;
+        }
+
+        void show() {
+            fill(ENEMY_COLOR);
+            super.show();
+        }
+
+        boolean run() {
+            PVector vec = copy(PVector.add(new PVector(p.loc.x - p.playerSize / 2, p.loc.y), PVector.mult(p.vel, PVector.dist(loc, p.nextLoc) / bulletSpeed)));
+
+            if (isTimeToShoot()) shootBulletStraightTowards(vec, bulletSpeed, bulletSize);
+
+            return super.run();
+        }
+    }
+
+    class EnemyShootWigglyBulletSpread extends Enemy {
+        float bulletSpreadRange, rotateAmount;
+        int bulletWiggleChangeDeadline, bulletWiggleAmount, bulletSize, bulletNum;
+
+        EnemyShootWigglyBulletSpread(PVector[] wayPoints, PVector wayPoint0, PVector wayPoint1, PVector wayPoint2, PVector wayPoint3, PVector vel, PVector loc, int bulletWiggleChangeDeadline, int bulletWiggleAmount, int bulletSize, int bulletNum, int currentWayPoint, int enemySize, int hp, int shootTimeCurrent, int shootTimeDeadline, int xpValue, float rotateAmount, float speed, float bulletSpeed, float bulletSpreadRange, boolean facingRight, boolean destroyAfterDestination) {
+            super(wayPoints, wayPoint0, wayPoint1, wayPoint2, wayPoint3, vel, loc, currentWayPoint, enemySize, hp, shootTimeCurrent, shootTimeDeadline, xpValue, speed, bulletSpeed, facingRight, destroyAfterDestination);
+            this.bulletSpreadRange = bulletSpreadRange;
+            this.rotateAmount = rotateAmount;
+            this.bulletWiggleChangeDeadline = bulletWiggleChangeDeadline;
+            this.bulletWiggleAmount = bulletWiggleAmount;
+            this.bulletSize = bulletSize;
+            this.bulletNum = bulletNum;
+        }
+
+        void show() {
+            fill(ENEMY_COLOR);
+            super.show();
+        }
+
+        boolean run() {
+            if (isTimeToShoot()) {
+                shootBulletWiggleTowards(copy(PVector.sub(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y), loc)), copy(loc), rotateAmount, bulletSpreadRange, bulletSpeed, bulletWiggleChangeDeadline, 0, bulletWiggleAmount, bulletSize, bulletNum);
+
+                shootTimeCurrent = 0;
+            }
+            moveTowardsLoc(new PVector(p.loc.x - (p.playerSize / 2), p.loc.y), 999999999);
+            return super.run();
+        }
+    }
+
+    class Level {
+        int tics;
+        boolean showBoss;
+
+        public Level() {
+            showBoss = false;
+            tics = 0;
+        }
+
+        void createEnemies() {
+            tics++;
+        }
+    }
+
+    class Level1 extends Level {
+        Level1() {}
+
+        void createEnemies() {
+            if (enemies.size() == 0 && tics < 840 && tics > 0) tics = 840;
+
+            if (showBoss) {
+                b1.run();
+                b1.show();
+            }
+            if (tics == 0) {
+                enemies.add(new EnemyShootHeadOn(new PVector[0], new PVector(12.5, 12.5), new PVector(12.5, height - 12.5), new PVector(12.5, height - 12.5), new PVector(12.5, 12.5), new PVector(), new PVector(12.5, height + 12.5), 3, 25, 10, 0, 60, 0, 50, 4.0, 5.0, true, false));
+            }
+            if (tics == 30) {
+                enemies.add(new EnemyShootHeadOn(new PVector[0], new PVector(width - 12.5, height - 12.5), new PVector(width - 12.5, 12.5), new PVector(width - 12.5, 12.5), new PVector(width - 12.5, height - 12.5), new PVector(), new PVector(width - 12.5, -12.5), 0, 25, 10, 0, 60, 0, 50, 4.0, 5.0, true, false));
+            }
+            if (tics == 840) {
+                enemies.clear();
+                enemies.add(new EnemyShootHeadOn(new PVector[0], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(width / 2, height - 12.5), 0, 25, 60, 0, 999999999, 0, 999999999, 4.0, 5.0, true, false));
+            }
+            if (tics == 1440) {
+                enemies.clear();
+                enemies.add(new EnemyShootHeadOn(new PVector[0], NO_WAYPOINT, new PVector(720, height + 12.5), new PVector(720, height + 12.5), NO_WAYPOINT, new PVector(), new PVector(width + 12.5, 100), 1, 25, 10, 0, 120, 0, 0, 1, 5.0, true, true));
+            }
+            if (tics == 1700) enemies.add(new EnemyShootHeadOn(new PVector[0], NO_WAYPOINT, new PVector(-12.5, 760), new PVector(-12.5, 760), NO_WAYPOINT, new PVector(), new PVector(width + 12.5, 495), 1, 25, 10, 0, 120, 0, 0, 1.0, 5.0, true, true));
+            if (tics == 1775) enemies.add(new EnemyShootHeadOn(new PVector[0], NO_WAYPOINT, new PVector(width + 12.5, 185), new PVector(width + 12.5, 185), NO_WAYPOINT, new PVector(), new PVector(-12.5, 550), 1, 25, 10, 0, 120, 0, 0, 1.0, 5.0, true, true));
+            if (tics == 1825) enemies.add(new EnemyShootHeadOn(new PVector[0], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(width / 2 - 170, -12.5), 0, 25, 30, 0, 999999999, 0, .3, 5.5, 0.0, true, false));
+            if (tics == 1880) enemies.add(new EnemyShootHeadOn(new PVector[0], NO_WAYPOINT, new PVector(-12.5, 250), new PVector(-12.5, 250), NO_WAYPOINT, new PVector(), new PVector(165, -12.5), 1, 25, 10, 0, 120, 0, 0, .33333333333333333, 5.0, true, true));
+            if (tics == 3300) {
+                enemies.clear();
+                showBoss = true;
+            }
+            super.createEnemies();
+        }
+    }
+
+    class Level2 extends Level {
+        Level2() {}
+
+        void createEnemies() {
+            if (enemies.size() == 0 && tics < 900 && tics > 0) tics = 900;
+            else if (enemies.size() == 0 && tics < 2250 && tics > 900) tics = 2250;
+            else if (enemies.size() == 0 && tics < 4000 && tics > 2250) tics = 4000;
+
+            if (showBoss) {
+                b2.run();
+                b2.show();
+            }
+            if (tics == 0) {
+                Enemy e = new EnemyShootWigglyBulletSpread(new PVector[1], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(width / 2 + 250, -12.5), 17, 7, 30, 1, 0, 25, 10, 0, 45, 26, PI, 1.0, 7.5, .75 * PI, true, true);
+                e.wayPoints[0] = new PVector(width / 2 - 250, height + 12.5);
+                enemies.add(e);
+            }
+            if (tics == 900) {
+                enemies.clear();
+                EnemyShootHeadOn e = new EnemyShootHeadOn(new PVector[4], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(width + 12.5, height - 12.5), 0, 25, 30, 0, 15, 14, .3, 7.5, 2.0, true, false);
+                e.wayPoints[0] = new PVector(12.5, height - 12.5);
+                e.wayPoints[1] = new PVector(12.5, 12.5);
+                e.wayPoints[2] = new PVector(width - 12.5, 12.5);
+                e.wayPoints[3] = new PVector(width - 12.5, height - 12.5);
+                enemies.add(e);
+                EnemyShootHeadOn e2 = new EnemyShootHeadOn(new PVector[4], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(-12.5, 12.5), 0, 25, 30, 0, 15, 14, .3, 7.5, 2.0, true, false);
+                e2.wayPoints[0] = new PVector(width - 12.5, 12.5);
+                e2.wayPoints[1] = new PVector(width - 12.5, height - 12.5);
+                e2.wayPoints[2] = new PVector(12.5, height - 12.5);
+                e2.wayPoints[3] = new PVector(12.5, 12.5);
+                enemies.add(e2);
+            }
+            if (tics == 2250) {
+                enemies.clear();
+                Enemy e = new EnemyShootWigglyBulletSpread(new PVector[1], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(-12.5, height / 2), 40, 1, 30, 0, 0, 25, 30, 0, 30, 26, PI, 1.0, 1.5, TWO_PI, true, false);
+                e.wayPoints[0] = new PVector(12.5, height / 2);
+                enemies.add(e);
+                Enemy e2 = new EnemyShootWigglyBulletSpread(new PVector[1], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(width + 12.5, height / 2), 40, 1, 30, 0, 0, 25, 30, 0, 30, 26, PI, 1.0, 1.5, TWO_PI, true, false);
+                e2.wayPoints[0] = new PVector(width - 12.5, height / 2);
+                enemies.add(e2);
+                Enemy e3 = new EnemyShootWigglyBulletSpread(new PVector[1], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(width / 2, -12.5), 40, 1, 30, 0, 0, 25, 30, 0, 30, 26, PI, 1.0, 1.5, TWO_PI, true, false);
+                e3.wayPoints[0] = new PVector(width / 2, 12.5);
+                enemies.add(e3);
+                Enemy e4 = new EnemyShootWigglyBulletSpread(new PVector[1], NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, NO_WAYPOINT, new PVector(), new PVector(width / 2, height + 12.5), 40, 1, 30, 0, 0, 25, 30, 0, 30, 26, PI, 1.0, 1.5, PI, true, false);
+                e4.wayPoints[0] = new PVector(width / 2, height - 12.5);
+                enemies.add(e4);
+            }
+            if (tics == 4000) {
+                enemies.clear();
+                showBoss = true;
+            }
+            super.createEnemies();
+        }
+    }
+
+    class Mist {
+        PVector loc;
+        int a;
+        boolean exists;
+
+        Mist(PVector loc, int a) {
+            this.loc = loc;
+            this.a = a;
+            this.exists = true;
+        }
+
+        void show() {
+            stroke(255, 0, 0, a);
+            point(loc.x, loc.y);
+            noStroke();
+        }
+
+        void run() {
+            a -= int(random(5, 10));
+            if (a <= 0) exists = false;
+            PVector locNew = new PVector();
+            locNew.x = random(-1, 1);
+            locNew.y = random(-1, 1);
+            locNew.mult(MAX_INT);
+            locNew.limit(3);
+            loc.add(locNew);
+        }
+    }
+
+    class Player {
+        PVector vel, loc, nextLoc;
+        int playerSize, hp, shootTime, shootState;
+        float speed, shootAngle;
+        boolean facingRight;
+
+        Player(PVector vel, PVector loc, PVector nextLoc, int playerSize, int hp, int shootTime, float speed, boolean facingRight) {
+            this.vel = vel;
+            this.loc = loc;
+            this.nextLoc = nextLoc;
+            this.playerSize = playerSize;
+            this.hp = hp;
+            this.shootTime = shootTime;
+            this.speed = speed;
+            this.facingRight = facingRight;
+            shootState = 1;
+        }
+
+        void show() {
+            fill(127.5);
+            stroke(0, 255, 0);
+
+            pushMatrix();
+            if (!facingRight) {
+                translate(loc.x - (playerSize / 2), loc.y);
+                triangle(-playerSize, 0, playerSize, playerSize, playerSize, -playerSize);
+            } else {
+                translate(loc.x - (playerSize / 2), loc.y);
+                rotate(PI);
+                triangle(-playerSize, 0, playerSize, playerSize, playerSize, -playerSize);
+            }
+            popMatrix();
+
+            stroke(255, 0, 0);
+            strokeWeight(10);
+            point(loc.x - (playerSize / 2), loc.y);
+            noStroke();
+            strokeWeight(5);
+        }
+
+        void run() {
+            int reloadSpeed = 1;
+            if (perkEquiped[0] == 1) reloadSpeed = reloadSpeedCost - 1;
+            if (shootTime >= 6 - (reloadSpeed - 1) && (mousePressed || autoFire)) {
+                final int BULLET_SPEED = 999999999;
+                PVector direction;
+                if (facingRight) direction = new PVector(BULLET_SPEED, 0);
+                else direction = new PVector(-BULLET_SPEED, 0);
+
+                if (perkEquiped[12] == 1) bulletSprayRange = PI / 4;
+                else if (perkEquiped[12] == -1) bulletSprayRange = 0;
+
+                float m = direction.mag();
+                float a = direction.heading2D();
+                if (perkEquiped[12] == 1) {
+                    if (shootAngle > bulletSprayRange) shootState = 1;
+                    else if (shootAngle < -bulletSprayRange) shootState = -1;
+                    if (shootState == -1) shootAngle += bulletSprayRange / 7;
+                    if (shootState == 1) shootAngle -= bulletSprayRange / 7;
+                }
+                a += shootAngle;
+                direction.x = m * cos(a);
+                direction.y = m * sin(a);
+
+                bullets.add(new BulletStraight(copy(direction), new PVector(loc.x - (playerSize / 2), loc.y), 9, -1, -1, -1, -1, 10, 8.0, 0.0, true, false));
+
+                shootTime = 0;
+            }
+            shootTime++;
+
+            if (keyCode == LEFT) facingRight = false;
+            else if (keyCode == RIGHT) facingRight = true;
+
+            if (get(int(loc.x - (playerSize / 2)), int(loc.y)) == ENEMY_COLOR || get(int(loc.x - (playerSize / 2)), int(loc.y)) == color(0, 0, 255)) shouldRestart = true;
+        }
+
+        void move() {
+            vel.set(0, 0, 0);
+
+            if (keys[4]) speed = 3.25;
+            else speed = 6.5;
+
+            if (keys[0] || keys[1] || keys[2] || keys[3]) {
+                if (keys[0]) vel.x = -speed;
+                if (keys[1]) vel.x = speed;
+                if (keys[2]) vel.y = -speed;
+                if (keys[3]) vel.y = speed;
+                vel.mult(MAX_INT);
+                vel.limit(speed);
+            }
+            nextLoc.set(PVector.add(loc, vel));
+
+            boolean onMap = nextLoc.x - (playerSize / 2) > 0 && nextLoc.x - (playerSize / 2) < width && nextLoc.y > 0 && nextLoc.y < height;
+            if (onMap) loc.set(nextLoc);
+        }
+    }
+
+    /*
+void saveMenu()
+ {
+ data[0] = "" + perkPoints;
+ data[1] = "" + reloadSpeedCost;
+ data[2] = "" + timeIntoScoreCost;
+ data[3] = "" + timeIntoScoreModifier;
+ data[4] = "" + grazeIntoScoreCost;
+ data[5] = "" + grazeIntoScoreModifier;
+ data[6] = "" + killsIntoScoreCost;
+ data[7] = "" + killsIntoScoreModifier;
+ data[8] = "" + bombNumCost;
+ data[9] = "" + level1KillsAchievementEarned;
+ data[10] = "" + level1Score1AchievementEarned;
+ for (int i = 0; i < NUM_ACHIEVEMENTS; i ++)
+ data[11 + i] = "" + grazeAchievementEarned[i];
+ data[14] = "" + perkEquiped[0];
+ data[15] = "" + perkEquiped[2];
+ data[16] = "" + perkEquiped[4];
+ data[17] = "" + perkEquiped[6];
+ data[18] = "" + perkEquiped[8];
+ data[19] = "" + highScores.get(highScores.size() - 1);
+ data[20] = "" + highScores.get(highScores.size() - 1);
+ data[24] = "" + inAutoSaveMode;
+ saveStrings("Save Data.txt", data);
+ data2[25] = "false";
+ saveStrings("Initial Data.txt", data2);
+ }
+ */
+    void keyPressed() {
+        if (!viewingHelpScreen && !inShop && !viewingAchievements) {
+            if (key == 'a' || key == 'A') keys[0] = true;
+            else if (key == 'd' || key == 'D') keys[1] = true;
+            else if (key == 'w' || key == 'W') keys[2] = true;
+            else if (key == 's' || key == 'S') keys[3] = true;
+            else if (keyCode == SHIFT) keys[4] = true;
+            else if (key == 'p' || key == 'P') paused = !paused;
+            else if (key == 'r' || key == 'R') {
+                keys[5] = true;
+                if (shouldRestart) restart();
+            } else if (key == 'f' || key == 'F') autoFire = !autoFire;
+            else if (key == 'n' || key == 'N') {
+                float minEnemyAppearTime = 999999999;
+                boolean shouldBreak = false;
+                for (int i = 0; i <= NUM_OF_ENEMY_TYPES - 1; i++) {
+                    if (enemyAppearDeadlines[i] - enemyAppearTimes[i] < minEnemyAppearTime) minEnemyAppearTime = enemyAppearDeadlines[i] - enemyAppearTimes[i];
+                }
+                for (int i = 0; i <= NUM_OF_ENEMY_TYPES - 1; i++) {
+                    if (minEnemyAppearTime == enemyAppearDeadlines[i] - enemyAppearTimes[i]) {
+                        for (int i2 = 0; i2 <= NUM_OF_ENEMY_TYPES - 1; i2++) {
+                            enemyAppearTimes[i2] += minEnemyAppearTime;
+                        }
+                        shouldBreak = true;
+                    }
+                    if (shouldBreak) break;
+                }
+            } else if (key == 't' || key == 'T') {
+                if (timesToRun == 1) timesToRun = 2;
+                else timesToRun = 1;
+            } else if (key == 'l' || key == 'L') showEffects = !showEffects;
+            else if (key == ' ' && bombNum > 0 && !paused && !viewingHelpScreen) {
+                bullets.clear();
+                splitBullets.clear();
+                enemies.clear();
+                bombNum--;
+            } else if (key == 'b' || key == 'B') viewingBlendMode = !viewingBlendMode;
+        }
+        if (keyCode == UP || keyCode == DOWN) {
+            if (perkEquiped[12] == 1) {
+                perkEquiped[12] = -1;
+                bulletSprayRange = 0;
+            } else if (perkEquiped[12] == -1) {
+                perkEquiped[12] = 1;
+                bulletSprayRange = 1.5 * PI;
+            }
+            if (perkEquiped[12] == -1) buttons[13].text2 = "Equip [Alt]";
+            else if (perkEquiped[12] == 1) buttons[13].text2 = "Unequip [Alt]";
+        }
+        //else if (key == '0' || key == ')')
+        //keys[6] = true;
+        //else if (key == '1' || key == '@')
+        //keys[7] = true;
+        //else if (key == '2' || key == '@')
+        //keys[8] = true;
+    }
+
+    void keyReleased() {
+        if (key == 'a' || key == 'A') keys[0] = false;
+        else if (key == 'd' || key == 'D') keys[1] = false;
+        else if (key == 'w' || key == 'W') keys[2] = false;
+        else if (key == 's' || key == 'S') keys[3] = false;
+        else if (keyCode == SHIFT) keys[4] = false;
+        else if (key == 'r' || key == 'R') keys[5] = false;
+        else if (key == 'h' || key == 'H') {
+            viewingHelpScreen = !viewingHelpScreen;
+            if (viewingHelpScreen) {
+                if (currentHelpScreen < 6) currentHelpScreen++;
+                else currentHelpScreen = 0;
+            }
+            viewingSaveMenu = false;
+            inShop = false;
+            viewingAchievements = false;
+        } else if (key == 'v' || key == 'V') {
+            viewingAchievements = !viewingAchievements;
+            viewingSaveMenu = false;
+            inShop = false;
+            viewingHelpScreen = false;
+        } else if (key == 'q' || key == 'Q') {
+            inShop = !inShop;
+            viewingSaveMenu = false;
+            viewingHelpScreen = false;
+            viewingAchievements = false;
+        }
+        //else if (keyCode == ENTER)
+        //{
+        //viewingSaveMenu = !viewingSaveMenu;
+        //inShop = false;
+        //viewingHelpScreen = false;
+        //viewingAchievements = false;
+        //}
+        //else if (key == '0' || key == ')')
+        //keys[6] = false;
+        //else if (key == '1' || key == '!')
+        //keys[7] = false;
+        //else if (key == '2' || key == '@')
+        //keys[8] = false;
+    }
+
+    void mouseReleased() {
+        for (int i = 0; i < BUTTON_NUM; i++) {
+            if (buttons[i].isVisible) {
+                if (buttons[i].beingPressed && mouseX > buttons[i].loc.x - (buttons[i].buttonSize.x / 2) && mouseX < buttons[i].loc.x + (buttons[i].buttonSize.x / 2) && mouseY > buttons[i].loc.y - (buttons[i].buttonSize.y / 2) && mouseY < buttons[i].loc.y + (buttons[i].buttonSize.y / 2)) buttons[i].pressed = true;
+            }
+        }
+    }
+
+    //This is called by draw
+    void keyTimerStuff() {
+        if (keys[5]) holdKeyTimers[11]++;
+        else holdKeyTimers[11] = 0;
+        if (keys[6]) holdKeyTimers[0]++;
+        else holdKeyTimers[0] = 0;
+
+        if (keys[7]) holdKeyTimers[1]++;
+        else holdKeyTimers[1] = 0;
+
+        if (keys[8]) holdKeyTimers[2]++;
+        else holdKeyTimers[2] = 0;
+
+        if (holdKeyTimers[0] >= 60) {
+            currentLevel = 0;
+            viewingHelpScreen = false;
+            viewingAchievements = false;
+            inShop = false;
+            restart();
+        } else if (holdKeyTimers[1] >= 60) {
+            currentLevel = 1;
+            viewingHelpScreen = false;
+            viewingAchievements = false;
+            inShop = false;
+            restart();
+        } else if (holdKeyTimers[2] >= 60) {
+            currentLevel = 2;
+            viewingHelpScreen = false;
+            viewingAchievements = false;
+            inShop = false;
+            restart();
+        } else if (holdKeyTimers[11] >= 60) restart();
+    }
+
+    PVector copy(PVector vec) {
+        return new PVector(vec.x, vec.y);
+    }
+
+    //void translate(PVector vec)
+    //{
+    //translate(vec.x, vec.y);
+    //}
+
+    //void rect(PVector loc, int w, int h)
+    //{
+    //rect(loc.x, loc.y, w, h);
+    //}
+
+    //void rect(PVector loc, PVector dimensions)
+    //{
+    //rect(loc.x, loc.y, dimensions.x, dimensions.y);
+    //}
+
+    //void ellipse(PVector loc, int diameter)
+    //{
+    //ellipse(loc.x, loc.y, diameter, diameter);
+    //}
+
+    //void point(PVector loc)
+    //{
+    //point(loc.x, loc.y);
+    //}
+</script>
+<canvas id="pjs" tabindex="0" width="925" height="715" style="image-rendering: -webkit-optimize-contrast !important;"></canvas>
+  
+
+
+
+
+
+<span style="position: absolute; top: 0px; left: 0px; opacity: 0; font-family: PjsEmptyFont, fantasy;">AAAAAAAA</span></body></html>
