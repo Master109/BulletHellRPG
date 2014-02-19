@@ -45,8 +45,8 @@ function Update ()
 		}
 	}
 	if (!hitCube)
-		transform.position += vel;
-	shootTimer ++;
+		transform.position += vel  * Time.timeScale;
+	shootTimer += 1 * Time.timeScale;
 	if (shootTimer > shootRate && Input.GetAxisRaw("Fire") == 1)
 	{
 		go = GameObject.Instantiate(bullet, transform.position, Quaternion.FromToRotation(Vector2.up, Vector2.up));

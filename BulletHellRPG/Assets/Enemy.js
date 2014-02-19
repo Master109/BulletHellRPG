@@ -49,7 +49,7 @@ function Update ()
 		}
 	}
 	if (!hitEnemy)
-		transform.position += vel;
+		transform.position += vel * Time.timeScale;
 	}
 	else if (shootTimer > shootRate)
 	{
@@ -73,7 +73,7 @@ function OnTriggerStay2D (other : Collider2D)
 	if (other.gameObject.tag == "Enemy" && other.gameObject != gameObject)
 	{
 		var vel = transform.position - other.gameObject.transform.position;
-		vel = Vector2.ClampMagnitude(vel, .2);
+		vel = Vector2.ClampMagnitude(vel, speed);
 		transform.position += vel;
 	}
 }

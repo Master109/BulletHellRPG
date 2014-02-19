@@ -23,8 +23,8 @@ function Update ()
 {
 	if (follow)
 	{
-		lifeTimer ++;
-		if (lifeTimer == deathTime)
+		lifeTimer += 1 * Time.timeScale;
+		if (lifeTimer >= deathTime)
 			Destroy(gameObject);
 		var velChange : Vector2 = GameObject.Find("Hitbox").transform.position - transform.position;
 		velChange *= 99999;
@@ -36,9 +36,9 @@ function Update ()
 	}
 	else if (Vector2.Distance(transform.position, shootLoc) >= range)
 		Destroy(gameObject);
-	transform.position += vel;
-	transform.rotation.eulerAngles.y += spinRateY;
-	transform.rotation.eulerAngles.z += spinRateZ;
+	transform.position += vel * Time.timeScale;
+	transform.rotation.eulerAngles.y += spinRateY * Time.timeScale;
+	transform.rotation.eulerAngles.z += spinRateZ * Time.timeScale;
 }
 
 function OnTriggerEnter2D (other : Collider2D)

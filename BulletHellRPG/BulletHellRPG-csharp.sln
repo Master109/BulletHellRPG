@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 
 Project("{F556D6FD-623F-7EC2-9666-11949FD1BC14}") = "BulletHellRPG", "Assembly-CSharp-firstpass-vs.csproj", "{EAAB73AB-9EBF-E05E-2ECA-46A5DAE2AD19}"
 EndProject
+Project("{F556D6FD-623F-7EC2-9666-11949FD1BC14}") = "BulletHellRPG", "Assembly-CSharp-vs.csproj", "{BA767511-B361-5A72-B771-9178D0470DB6}"
+EndProject
+Project("{F556D6FD-623F-7EC2-9666-11949FD1BC14}") = "BulletHellRPG", "Assembly-CSharp-Editor-firstpass-vs.csproj", "{8C56212A-E5B5-4E76-2D95-9B15FF3198F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,11 +17,19 @@ Global
 		{EAAB73AB-9EBF-E05E-2ECA-46A5DAE2AD19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAAB73AB-9EBF-E05E-2ECA-46A5DAE2AD19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAAB73AB-9EBF-E05E-2ECA-46A5DAE2AD19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA767511-B361-5A72-B771-9178D0470DB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA767511-B361-5A72-B771-9178D0470DB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA767511-B361-5A72-B771-9178D0470DB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA767511-B361-5A72-B771-9178D0470DB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C56212A-E5B5-4E76-2D95-9B15FF3198F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C56212A-E5B5-4E76-2D95-9B15FF3198F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C56212A-E5B5-4E76-2D95-9B15FF3198F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C56212A-E5B5-4E76-2D95-9B15FF3198F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-					GlobalSection(MonoDevelopProperties) = preSolution
+																		GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Assembly-CSharp.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1
