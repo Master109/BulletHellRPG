@@ -8,6 +8,10 @@ var spinRateZ = 0.0;
 var range = 75;
 var shootLoc : Vector2;
 var damage = 1;
+var lifeTimer = 0;
+var follow = false;
+var deathTime = 300;
+var velChangeMax = 0.02;
 
 function Start ()
 {
@@ -17,11 +21,24 @@ function Start ()
 
 function Update ()
 {
+	if (follow)
+	{
+		lifeTimer ++;
+		if (lifeTimer == deathTime)
+			Destroy(gameObject);
+		var velChange : Vector2 = GameObject.Find("Hitbox").transform.position - transform.position;
+		velChange *= 99999;
+		velChange = Vector2.ClampMagnitude(velChange, velChangeMax);
+		vel += velChange;
+		vel *= 99999;
+		vel = Vector2.ClampMagnitude(vel, speed);
+		transform.rotation = Quaternion.FromToRotation(Vector2.up, vel);
+	}
+	else if (Vector2.Distance(transform.position, shootLoc) >= range)
+		Destroy(gameObject);
 	transform.position += vel;
 	transform.rotation.eulerAngles.y += spinRateY;
 	transform.rotation.eulerAngles.z += spinRateZ;
-	if (Vector2.Distance(transform.position, shootLoc) >= range)
-		Destroy(gameObject);
 }
 
 function OnTriggerEnter2D (other : Collider2D)

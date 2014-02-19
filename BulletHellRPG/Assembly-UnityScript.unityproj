@@ -5,7 +5,7 @@
 	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 	<ProductVersion>10.0.20506</ProductVersion>
 	<SchemaVersion>2.0</SchemaVersion>
-	<ProjectGuid>{92506EF7-1E41-6AC6-CAA7-26ED180A1B00}</ProjectGuid>
+	<ProjectGuid>{E425243A-7A10-5AA1-0EAD-7812BD64CA00}</ProjectGuid>
 	<OutputType>Library</OutputType>
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
@@ -46,7 +46,6 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\AlignObject.js" />
      <Compile Include="Assets\BulletStraight.js" />
      <Compile Include="Assets\Cutscene.js" />
      <Compile Include="Assets\EndZone.js" />
@@ -77,9 +76,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
-      <Project>{618A7EE5-A15C-9751-A2D8-2DBFB809E44D}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
+      <Project>{EAAB73AB-9EBF-E05E-2ECA-46A5DAE2AD19}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
     <ProjectReference Include="Assembly-UnityScript-firstpass.unityproj">
-      <Project>{7C87A1C4-FB85-E99B-16AD-6CC488C7E3D9}</Project>      <Name>Assembly-UnityScript-firstpass</Name>    </ProjectReference>
+      <Project>{A24152F7-B5B6-5BC3-FA61-9435C3B58ABD}</Project>      <Name>Assembly-UnityScript-firstpass</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
